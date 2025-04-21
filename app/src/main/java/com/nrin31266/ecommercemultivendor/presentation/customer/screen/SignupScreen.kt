@@ -1,36 +1,22 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -39,31 +25,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.common.constant.USER_ROLE
-import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
-import com.nrin31266.ecommercemultivendor.presentation.nav.SubNavigation
-
-import com.nrin31266.ecommercemultivendor.presentation.utils.BackButton
 import com.nrin31266.ecommercemultivendor.presentation.utils.ButtonType
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomButton
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTextField
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
-import com.nrin31266.ecommercemultivendor.presentation.utils.OtherLogin
 import com.nrin31266.ecommercemultivendor.presentation.utils.TextDivider
 
 
 @Composable
-fun LoginScreen(
+fun SignupScreen(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
@@ -82,7 +62,7 @@ fun LoginScreen(
     Scaffold(
         topBar = {
             CustomTopBar(
-                title = "Login",
+                title = "Signup",
                 actionIcon = Icons.Default.Info,
                 modifier = Modifier,
                 onBackClick = {
@@ -185,9 +165,9 @@ fun LoginScreen(
                     CustomButton(
                         text = "Register",
                         onClick = {
-                            navController.navigate(CustomerRoutes.CustomerSignupScreen.route)
+                            navController.navigate(CustomerRoutes.CustomerLoginScreen.route)
                             {
-                                popUpTo(CustomerRoutes.CustomerLoginScreen.route) { inclusive = true }
+                                popUpTo(CustomerRoutes.CustomerSignupScreen.route) { inclusive = true }
 //                                launchSingleTop = true
                             }
                         },

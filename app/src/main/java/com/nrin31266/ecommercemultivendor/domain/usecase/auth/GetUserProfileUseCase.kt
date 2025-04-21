@@ -1,4 +1,4 @@
-package com.nrin31266.ecommercemultivendor.domain.usecase.users
+package com.nrin31266.ecommercemultivendor.domain.usecase.auth
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto

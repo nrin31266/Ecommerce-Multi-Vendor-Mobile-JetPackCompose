@@ -1,4 +1,5 @@
 package com.nrin31266.ecommercemultivendor.presentation.utils
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MailLock
@@ -24,7 +25,9 @@ fun CustomTextField (
     leadingIcon: ImageVector? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
-    fontSize:  TextUnit = 16.sp
+    fontSize:  TextUnit = 16.sp,
+    placeholder: String = "",
+    trailingIcon: @Composable (() -> Unit)? = null
 
 ){
     OutlinedTextField(
@@ -39,5 +42,10 @@ fun CustomTextField (
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         textStyle = TextStyle(fontSize = fontSize),
+        placeholder = { Text(text = placeholder) },
+        trailingIcon = {
+            trailingIcon?.invoke()
+        }
+
     )
 }
