@@ -4,9 +4,11 @@ import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
+import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import kotlinx.coroutines.flow.Flow
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -31,6 +33,7 @@ interface ApiService {
 //    suspend fun getSellerProfile(@Header("Authorization") jwt: String): SellerDto
     @POST("auth/send-login-signup-otp")
     suspend fun sendEmailOtp(@Body request: AuthRequest): ApiResponseNoData
-
+    @POST("auth/valid-token")
+    suspend fun verifyToken(@Body request: VerifyTokenRequest): VerifyTokenResponse
 
 }

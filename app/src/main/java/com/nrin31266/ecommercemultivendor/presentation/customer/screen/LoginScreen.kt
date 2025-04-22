@@ -1,65 +1,51 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
-import androidx.compose.foundation.background
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.LargeTopAppBar
-import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.common.constant.USER_ROLE
-import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthEvent
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
-import com.nrin31266.ecommercemultivendor.presentation.nav.SubNavigation
-
-import com.nrin31266.ecommercemultivendor.presentation.utils.BackButton
 import com.nrin31266.ecommercemultivendor.presentation.utils.ButtonType
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomButton
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
+import com.nrin31266.ecommercemultivendor.presentation.utils.CustomOTPField
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTextField
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
-import com.nrin31266.ecommercemultivendor.presentation.utils.OtherLogin
 import com.nrin31266.ecommercemultivendor.presentation.utils.TextDivider
+import kotlinx.coroutines.delay
 
 
 @Composable
@@ -71,10 +57,23 @@ fun LoginScreen(
 
     var email by remember { mutableStateOf("") }
     var otp by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     LaunchedEffect (Unit){
         state.value.let {
             email = it.currentEmail ?: ""
+        }
+        authViewModel.authEvent.collect { event ->
+            when (event) {
+                is AuthEvent.NavigateToHome -> {
+                    navController.navigate(CustomerRoutes.CustomerHomeScreen.route) {
+                        popUpTo(CustomerRoutes.CustomerLoginScreen.route) { inclusive = true }
+                    }
+                }
+                is AuthEvent.ShowSnackbar -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
@@ -119,17 +118,17 @@ fun LoginScreen(
 
                 )
                  if(state.value.isSentOtp){
-                     CustomTextField(
+                     CustomOTPField(
                          value = otp,
                          onValueChange = { otp = it },
-                         label = "OTP",
-                         placeholder = "Enter",
-                         leadingIcon = Icons.Default.Password,
-                         modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                         trailingIcon = {
-                             IconButton(onClick = {}){
-                                 Icon(imageVector = Icons.Default.Replay, contentDescription = null)
-                             }
+                         canResend = state.value.timeLeft == 0,
+                         timeRemaining = state.value.timeLeft,
+                         onResend = {
+                             val request = AuthRequest(
+                                 email = email,
+                                 role = USER_ROLE.ROLE_CUSTOMER
+                             )
+                             authViewModel.sendEmailOtp(request, true)
                          }
                      )
                  }
@@ -157,17 +156,18 @@ fun LoginScreen(
 
                         if(!state.value.isSentOtp){
                             val request = AuthRequest(
-                                email = "signing_$email",
+                                email = email,
                                 role = USER_ROLE.ROLE_CUSTOMER
                             )
-                            authViewModel.sendEmailOtp(request)
+                            authViewModel.sendEmailOtp(request, true)
                         }else{
                             val request = AuthRequest(
                                 email = email,
                                 otp = otp,
                                 role = USER_ROLE.ROLE_CUSTOMER
                             )
-                            authViewModel.userLogin(request)
+                            authViewModel.userLogin(request,
+                            )
                         }
 
                     },
@@ -186,10 +186,10 @@ fun LoginScreen(
                         text = "Register",
                         onClick = {
                             navController.navigate(CustomerRoutes.CustomerSignupScreen.route)
-                            {
-                                popUpTo(CustomerRoutes.CustomerLoginScreen.route) { inclusive = true }
-//                                launchSingleTop = true
-                            }
+//                            {
+//                                popUpTo(CustomerRoutes.CustomerLoginScreen.route) { inclusive = true }
+////                                launchSingleTop = true
+//                            }
                         },
                         modifier = Modifier.fillMaxWidth(),
                         type = ButtonType.OUTLINED

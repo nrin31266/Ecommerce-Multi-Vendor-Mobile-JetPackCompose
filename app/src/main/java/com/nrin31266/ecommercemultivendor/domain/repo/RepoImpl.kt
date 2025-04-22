@@ -6,9 +6,11 @@ import com.nrin31266.ecommercemultivendor.common.toReadableErrorMoshi
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
+import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import com.nrin31266.ecommercemultivendor.network.ApiService
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.Dispatchers
@@ -20,17 +22,20 @@ import java.io.IOException
 import javax.inject.Inject
 
 class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
-    override fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>> {
-        TODO("Not yet implemented")
-    }
+    override fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.userSignup(authRequest) })
+    }.flowOn(Dispatchers.IO)
 
     override fun userLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>> = flow {
         emit(ResultState.Loading)
         try {
             val response = apiService.userLogin(authRequest)
             emit(ResultState.Success(response))
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message ?: "Unknown error"))
+        }  catch (e: HttpException) {
+            emit(ResultState.Error(e.toReadableErrorMoshi()))
+        }  catch (e: Exception) {
+            emit(ResultState.Error("Unknown error: ${e.localizedMessage}"))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -51,8 +56,10 @@ class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
         try {
             val response = apiService.getUserProfile(jwt)
             emit(ResultState.Success(response))
-        } catch (e: Exception) {
-            emit(ResultState.Error(e.message ?: "Unknown error"))
+        } catch (e: HttpException) {
+            emit(ResultState.Error(e.toReadableErrorMoshi()))
+        }  catch (e: Exception) {
+            emit(ResultState.Error("Unknown error: ${e.localizedMessage}"))
         }
     }.flowOn(Dispatchers.IO)
 
@@ -69,16 +76,24 @@ class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
 
     override fun sendEmailOtp(authRequest: AuthRequest): Flow<ResultState<ApiResponseNoData>> = flow {
         emit(ResultState.Loading)
-        try {
-            val response = apiService.sendEmailOtp(authRequest)
-            emit(ResultState.Success(response))
-        } catch (e: HttpException) {
-            emit(ResultState.Error(e.toReadableErrorMoshi()))
-        }  catch (e: Exception) {
-            emit(ResultState.Error("Unknown error: ${e.localizedMessage}"))
-        }
-
-
+        emit(makeApiCall { apiService.sendEmailOtp(authRequest) })
     }.flowOn(Dispatchers.IO)
 
+    override fun verifyToken(verifyTokenRequest: VerifyTokenRequest): Flow<ResultState<VerifyTokenResponse>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.verifyToken(verifyTokenRequest) })
+    }.flowOn(Dispatchers.IO)
+
+
+
+    private suspend fun <T> makeApiCall(apiCall: suspend () -> T): ResultState<T> {
+        return try {
+            val response = apiCall()
+            ResultState.Success(response)
+        } catch (e: HttpException) {
+            ResultState.Error(e.toReadableErrorMoshi())
+        } catch (e: Exception) {
+            ResultState.Error("Unknown error: ${e.localizedMessage}")
+        }
+    }
 }

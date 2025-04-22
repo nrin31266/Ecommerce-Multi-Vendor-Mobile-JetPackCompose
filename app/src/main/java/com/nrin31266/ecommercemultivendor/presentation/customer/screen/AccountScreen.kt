@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
@@ -37,6 +38,7 @@ fun AccountScreen(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
 //            CustomTopBar(
@@ -88,17 +90,27 @@ fun AccountScreen(
                         .padding(horizontal = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Button(
-                        {
-                            navController.navigate(CustomerRoutes.CustomerLoginScreen.route)
-                            {
+                   if(authState.value.isLogin){
+                       Button(
+                           {
+                              authViewModel.logout()
+                           }, modifier = Modifier, shape = RoundedCornerShape(8.dp)
+                       ) {
+                           Text("Logout")
+                       }
+                   }else{
+                       Button(
+                           {
+                               navController.navigate(CustomerRoutes.CustomerLoginScreen.route)
+                               {
 //                                popUpTo(UserRoutes.UserHomeScreen.route) { inclusive = true }
 //                                launchSingleTop = true
-                            }
-                        }, modifier = Modifier, shape = RoundedCornerShape(8.dp)
-                    ) {
-                        Text("Login")
-                    }
+                               }
+                           }, modifier = Modifier, shape = RoundedCornerShape(8.dp)
+                       ) {
+                           Text("Login")
+                       }
+                   }
 
                 }
             }

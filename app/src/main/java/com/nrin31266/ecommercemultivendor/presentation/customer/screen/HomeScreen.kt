@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
@@ -24,27 +25,28 @@ fun HomeScreen(
     navController: NavController,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
-    Scaffold (
+    val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
+
+    Scaffold(
         topBar = {
             CustomTopBar(
                 title = "Nguyen Van",
                 actionIcon = Icons.Default.ArrowBack,
                 modifier = Modifier
 
-                )
+            )
         },
         contentWindowInsets = WindowInsets(0),
 
-        ){
-            innerPadding ->
-        Column (
-            modifier = Modifier.padding(innerPadding).fillMaxSize().background(Color.Red)
+        ) { innerPadding ->
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .fillMaxSize()
+
         ) {
-            // Thêm TopAppBar trực tiếp không qua Scaffold
 
-
-            // Nội dung với padding từ layout cha
-            Text("Đơn hàng")
+            Text(authState.value.jwt?:"Not logged in")
         }
     }
 

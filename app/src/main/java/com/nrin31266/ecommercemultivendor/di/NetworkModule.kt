@@ -13,6 +13,17 @@ import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
+
+import android.util.Log
+import okhttp3.logging.HttpLoggingInterceptor
+
+fun provideLoggingInterceptor(): HttpLoggingInterceptor {
+    val loggingInterceptor = HttpLoggingInterceptor { message ->
+        Log.d("API_LOG", message)
+    }
+    loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY // Log chi tiết request và response
+    return loggingInterceptor
+}
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -20,14 +31,16 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
-        return OkHttpClient.Builder().build() // Bạn có thể thêm interceptor vào đây
+        return OkHttpClient.Builder()
+            .addInterceptor(provideLoggingInterceptor())
+            .build()
     }
 
     @Provides
     @Singleton
     fun provideMoshi(): Moshi {
         return Moshi.Builder()
-            .add(KotlinJsonAdapterFactory()) // Thêm hỗ trợ cho các class Kotlin
+            .add(KotlinJsonAdapterFactory())
             .build()
     }
 
@@ -47,3 +60,5 @@ object NetworkModule {
         return retrofit.create(ApiService::class.java)
     }
 }
+
+
