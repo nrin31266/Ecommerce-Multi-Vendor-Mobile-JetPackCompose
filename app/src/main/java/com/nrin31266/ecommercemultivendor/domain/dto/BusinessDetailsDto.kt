@@ -6,10 +6,10 @@ package com.nrin31266.ecommercemultivendor.domain.dto
 //String logo;
 //String banner;
 data class BusinessDetailsDto(
-    val businessName: String,
-    val businessEmail: String,
-    val businessMobile: String,
-    val businessAddress: String,
-    val logo: String,
-    val banner: String
+    val businessName: String?=null,
+    val businessEmail: String?=null,
+    val businessMobile: String?=null,
+    val businessAddress: String?=null,
+    val logo: String?=null,
+    val banner: String?=null
 )

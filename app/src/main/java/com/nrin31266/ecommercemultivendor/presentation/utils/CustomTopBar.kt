@@ -19,32 +19,35 @@ import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun CustomTopBar(
-    title: String,
+    title: String? = null,
     modifier: Modifier = Modifier,
     onBackClick: (() -> Unit)? = null,
     backgroundColor: Color = Color.Transparent,
     titleColor: Color = MaterialTheme.colorScheme.onBackground,
     actionIcon: ImageVector? = null,
     onActionClick: (() -> Unit)? = null,
-    extraContent: (@Composable () -> Unit)? = null
+    extraContent: (@Composable () -> Unit)? = null,
+    content : (@Composable () -> Unit)? = null
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()).padding(bottom = 10.dp)
     ) {
-        Box(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp).padding(bottom = 10.dp),
+                .padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
 
         ) {
 
             if (onBackClick != null) {
                 IconButton(
                     onClick = onBackClick,
-                    modifier = Modifier.align(Alignment.CenterStart)
+
                 ) {
                     Icon(
                         imageVector = Icons.Default.ArrowBack,
@@ -55,21 +58,29 @@ fun CustomTopBar(
             }
 
 
-            Text(
-                text = title,
-                color = titleColor,
-                fontSize = 20.sp,
-                modifier = Modifier.align(Alignment.Center),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontWeight = FontWeight.Bold
-            )
+
+            Column (modifier = Modifier.weight(1f)){
+                if(title != null){
+                    Text(
+                        text = title,
+                        color = titleColor,
+                        fontSize = 20.sp,
+
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+                if(content != null){
+                    content()
+                }
+            }
 
 
             if (actionIcon != null && onActionClick != null) {
                 IconButton(
                     onClick = onActionClick,
-                    modifier = Modifier.align(Alignment.CenterEnd)
+
                 ) {
                     Icon(
                         imageVector = actionIcon,
@@ -82,13 +93,7 @@ fun CustomTopBar(
 
 
         if (extraContent != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            ) {
-                extraContent()
-            }
+            extraContent()
         }
     }
 }

@@ -11,7 +11,9 @@ import androidx.compose.material.icons.filled.Password
 import androidx.compose.material.icons.filled.Replay
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import com.nrin31266.ecommercemultivendor.R
 
 @Composable
 fun CustomOTPField(
@@ -41,8 +43,9 @@ fun CustomOTPField(
             } else {
                 Text(
                     text = timeRemaining?.let { "$it s" } ?: "",
-                    style = MaterialTheme.typography.labelMedium,
-                    modifier = Modifier.padding(end = 8.dp)
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(end = 8.dp),
+                    color = colorResource(R.color.elegant_gold)
                 )
             }
         }

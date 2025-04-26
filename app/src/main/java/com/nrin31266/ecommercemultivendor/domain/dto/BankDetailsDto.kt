@@ -6,8 +6,8 @@ package com.nrin31266.ecommercemultivendor.domain.dto
 //
 //String swiftCode;
 data class BankDetailsDto(
-    val accountNumber: String,
-    val accountHolderName: String,
-    val ifscCode: String,
-    val swiftCode: String
+    val accountNumber: String?=null,
+    val accountHolderName: String?=null,
+    val ifscCode: String?=null,
+    val swiftCode: String?=null
 )

@@ -47,6 +47,7 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AccountSc
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.HomeScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.LoginScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
 
 @Composable
@@ -136,6 +137,9 @@ fun App(
                     }
                     composable(CustomerRoutes.CustomerOrdersScreen.route) {
                         OrdersScreen(navController)
+                    }
+                    composable(CustomerRoutes.SearchScreen.route){
+                        SearchScreen(navController)
                     }
 
                 }

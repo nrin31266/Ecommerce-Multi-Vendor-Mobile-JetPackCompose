@@ -23,18 +23,18 @@ import com.nrin31266.ecommercemultivendor.common.constant.USER_ROLE
 //Address pickupAddress;
 //String gstin;
 data class SellerDto(
-    val id: Long,
-//    val password: String,
-    val email: String,
-    val sellerName: String,
-    val mobile: String,
-    val role: USER_ROLE,
-    val isEmailVerified: Boolean,
-    val accountStatus: ACCOUNT_STATUS,
-    val taxCode: String,
-    val gstin: String,
-    val businessDetails: BusinessDetailsDto,
-    val bankDetails: BankDetailsDto,
-    val pickupAddress: AddressDto
-    // Các trường khác của SellerDto
+    var id : Long? = null,
+    var sellerName : String? = null,
+    var mobile : String? = null,
+    var email : String? = null,
+    var password : String? = null,
+    var businessDetails : BusinessDetailsDto? = null,
+    var bankDetails : BankDetailsDto? = null,
+    var role : USER_ROLE? = null,
+    var isEmailVerified : Boolean? = null,
+    var accountStatus : ACCOUNT_STATUS? = null,
+    var taxCode : String? = null,
+    var pickupAddress : AddressDto? = null,
+    var gstin : String? = null,
+
 )

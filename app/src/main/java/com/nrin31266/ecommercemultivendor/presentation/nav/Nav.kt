@@ -14,6 +14,7 @@ sealed class CustomerRoutes(val route: String){
     data object CustomerHomeScreen : CustomerRoutes("customer_home_screen")
     data object CustomerAccountScreen : CustomerRoutes("customer_account_screen")
     data object CustomerOrdersScreen : CustomerRoutes("customer_orders_screen")
+    data object SearchScreen : CustomerRoutes("search_screen")
 }
 
 
