@@ -3,6 +3,7 @@ package com.nrin31266.ecommercemultivendor.domain.repo
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.toReadableErrorMoshi
+import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
@@ -10,6 +11,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import com.nrin31266.ecommercemultivendor.network.ApiService
 import com.squareup.moshi.JsonDataException
@@ -84,6 +86,15 @@ class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
         emit(makeApiCall { apiService.verifyToken(verifyTokenRequest) })
     }.flowOn(Dispatchers.IO)
 
+    override fun getProducts(
+        category: String?,
+        sort: String?,
+        pageNumber: Int?,
+        search: String?
+    ): Flow<ResultState<PageableDto<ProductDto>>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getProducts(category, sort, pageNumber, search) })
+    }.flowOn(Dispatchers.IO)
 
 
     private suspend fun <T> makeApiCall(apiCall: suspend () -> T): ResultState<T> {

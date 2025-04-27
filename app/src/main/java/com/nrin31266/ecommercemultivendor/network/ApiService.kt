@@ -1,6 +1,7 @@
 package com.nrin31266.ecommercemultivendor.network
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
@@ -8,12 +9,14 @@ import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import kotlinx.coroutines.flow.Flow
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 //fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
 //fun userLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
@@ -35,5 +38,27 @@ interface ApiService {
     suspend fun sendEmailOtp(@Body request: AuthRequest): ApiResponseNoData
     @POST("auth/valid-token")
     suspend fun verifyToken(@Body request: VerifyTokenRequest): VerifyTokenResponse
+//    @RequestParam(required = false) String category,
+//    @RequestParam(required = false) String brand,
+//    @RequestParam(required = false) String colors,
+//    @RequestParam(required = false) String sizes,
+//    @RequestParam(required = false) Integer minimumPrice,
+//    @RequestParam(required = false) Integer maximumPrice,
+//    @RequestParam(required = false) Integer minimumDiscount,
+//    @RequestParam(required = false) String sort,
+//    @RequestParam(required = false) String stock,
+//    @RequestParam(defaultValue = "1", required = false) Integer pageNumber,
+//    @RequestParam(required = false) String search
+    @GET("products")
+    suspend fun getProducts(
+        @Query("category") category: String? = null,
+        @Query("sort") sort: String? = null,
+        @Query("pageNumber") pageNumber: Int? = null,
+        @Query("search") search: String? = null,
+
+    ): PageableDto<ProductDto>
+
+
+
 
 }

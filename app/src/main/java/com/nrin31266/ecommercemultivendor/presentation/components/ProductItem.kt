@@ -50,25 +50,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductOptionTypeDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 
-//@Composable
-//fun Test(){
-//    val products : List<ProductDto> = listOf(
-//
-//    )
-//
-//    LazyVerticalGrid(
-//        columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(2),
-//        modifier = Modifier.padding(vertical = 8.dp),
-//        verticalArrangement = Arrangement.spacedBy(8.dp),
-//        horizontalArrangement = Arrangement.spacedBy(8.dp)
-//    ) {
-//        items(products) { item ->
-//            ProductItem(item = item, onClick = {
-//
-//            })
-//        }
-//    }
-//}
+
 
 @Composable
 @Preview(showSystemUi = true)
@@ -178,6 +160,15 @@ fun ProductItem(
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = item.seller?.sellerName?:"",
+                    style = MaterialTheme.typography.bodyMedium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.Gray
+                )
+                Spacer(modifier = Modifier.height(2.dp))
 
 
                 Row (verticalAlignment = Alignment.CenterVertically) {
@@ -192,7 +183,7 @@ fun ProductItem(
                                 color = colorResource(R.color.error_red).copy(alpha = 0.1f),
                                 shape = RoundedCornerShape(4.dp)
                             )
-                            .padding(horizontal = 2.dp, vertical = 2.dp)
+                            .padding(horizontal = 4.dp)
                     ) {
                         Text(
                             text = "-${item.discountPercentage}%",

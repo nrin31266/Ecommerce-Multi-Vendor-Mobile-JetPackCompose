@@ -30,11 +30,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.bottombar.AnimatedBottomBar
 import com.example.bottombar.components.BottomBarItem
 import com.example.bottombar.model.IndicatorDirection
@@ -47,6 +49,8 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AccountSc
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.HomeScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.LoginScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductDetailsScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
 
@@ -140,6 +144,36 @@ fun App(
                     }
                     composable(CustomerRoutes.SearchScreen.route){
                         SearchScreen(navController)
+                    }
+                    composable(
+                        route = "${CustomerRoutes.ProductsScreen.route}?search={search}&category={category}&sort={sort}",
+                        arguments = listOf(
+                            navArgument("search") { defaultValue = "" },
+                            navArgument("category") { defaultValue = "" },
+                            navArgument("sort") { defaultValue = "" }
+                        )
+                    ) { backStackEntry ->
+                        val search = backStackEntry.arguments?.getString("search") ?: ""
+                        val category = backStackEntry.arguments?.getString("category") ?: ""
+                        val sort = backStackEntry.arguments?.getString("sort") ?: ""
+
+                        ProductsScreen(
+                            search = search,
+                            category = category,
+                            sort = sort,
+                            navController = navController
+                        )
+                    }
+
+
+                    composable(
+                        route = CustomerRoutes.ProductDetailScreen.route,
+                        arguments = listOf(
+                            navArgument("productId") { type = NavType.StringType }
+                        )
+                    ) { backStackEntry ->
+                        val productId = backStackEntry.arguments?.getString("productId")
+                        ProductDetailsScreen(productId = productId!!, navController = navController)
                     }
 
                 }

@@ -15,6 +15,19 @@ sealed class CustomerRoutes(val route: String){
     data object CustomerAccountScreen : CustomerRoutes("customer_account_screen")
     data object CustomerOrdersScreen : CustomerRoutes("customer_orders_screen")
     data object SearchScreen : CustomerRoutes("search_screen")
+    data object ProductsScreen : CustomerRoutes("products_screen") {
+        fun withQuery(search: String?=null, category: String?=null, sort: String?=null): String {
+            return "products_screen?search=${search.orEmpty()}&category=${category.orEmpty()}&sort=${sort.orEmpty()}"
+        }
+    }
+
+
+    data object ProductDetailScreen : CustomerRoutes("product_detail_screen/{productId}") {
+        fun withPath(productId: String): String {
+            return "product_detail_screen/$productId"
+        }
+    }
+
 }
 
 

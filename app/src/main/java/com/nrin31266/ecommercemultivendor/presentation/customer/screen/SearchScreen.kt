@@ -46,20 +46,27 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.SearchViewModel
+import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.SearchBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.TightIconButton
 import java.time.format.TextStyle
 
 @Composable
-fun SearchScreen(navController: NavController) {
-    var searchQuery by remember { mutableStateOf("") }
+fun SearchScreen(
+    navController: NavController,
+    viewModel: SearchViewModel = viewModel()
+) {
+    val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
     // Khi composable lên màn hình, request focus và show keyboard
-    LaunchedEffect (Unit) {
+    LaunchedEffect(Unit) {
         focusRequester.requestFocus()
         keyboardController?.show()
     }
@@ -72,10 +79,10 @@ fun SearchScreen(navController: NavController) {
                 content = {
                     SmallBasicSearchField(
                         query = searchQuery,
-                        onQueryChange = { searchQuery = it },
+                        onQueryChange = { viewModel.onSearchQueryChanged(it) },
                         hint = "Search now...",
                         modifier = Modifier.focusRequester(focusRequester) // gắn requestFocus vào đây
-
+                        , navController = navController
                     )
                 }
             )
@@ -94,12 +101,14 @@ fun SearchScreen(navController: NavController) {
         }
     }
 }
+
 @Composable
 fun SmallBasicSearchField(
     query: String,
     onQueryChange: (String) -> Unit,
     modifier: Modifier = Modifier,
-    hint: String = "Search now..."
+    hint: String = "Search now...",
+    navController: NavController
 ) {
     BasicTextField(
         value = query,
@@ -114,7 +123,9 @@ fun SmallBasicSearchField(
 
         decorationBox = { inner ->
             Box(
-                Modifier.fillMaxSize().padding(start = 10.dp),
+                Modifier
+                    .fillMaxSize()
+                    .padding(start = 10.dp),
                 contentAlignment = Alignment.CenterStart,
             ) {
                 if (query.isEmpty()) {
@@ -126,9 +137,22 @@ fun SmallBasicSearchField(
                 ) {
                     inner()
                     Spacer(Modifier.weight(1f))
-                    Button({}, modifier = Modifier.clip(RoundedCornerShape(0.dp, 8.dp, 8.dp)).width(50.dp), colors = ButtonDefaults.buttonColors(
-                        colorResource(R.color.elegant_gold)
-                    ), shape = RoundedCornerShape(0.dp), contentPadding = PaddingValues(8.dp)
+                    Button(
+                        {
+                            if (query.trim().isNotEmpty()) {
+                                navController.navigate(CustomerRoutes.ProductsScreen.withQuery(
+                                    search = query
+                                ))
+                            }
+                        },
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(0.dp, 8.dp, 8.dp))
+                            .width(50.dp),
+                        colors = ButtonDefaults.buttonColors(
+                            colorResource(R.color.elegant_gold)
+                        ),
+                        shape = RoundedCornerShape(0.dp),
+                        contentPadding = PaddingValues(8.dp)
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
