@@ -108,4 +108,8 @@ dependencies {
 
     // DataStore
     implementation("androidx.datastore:datastore-preferences:1.0.0")
+
+    // Flow row
+    implementation ("com.google.accompanist:accompanist-flowlayout:0.30.1")
+
 }

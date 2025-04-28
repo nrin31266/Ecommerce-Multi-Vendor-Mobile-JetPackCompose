@@ -8,26 +8,29 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
+
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
+
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Chat
@@ -35,25 +38,36 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.rememberModalBottomSheetState
+
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SheetState
+import androidx.compose.material3.SheetValue
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
@@ -62,6 +76,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.min
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -79,9 +94,10 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
 import com.nrin31266.ecommercemultivendor.presentation.utils.ImagesSlider
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel = hiltViewModel(),
@@ -93,15 +109,74 @@ fun ProductDetailsScreen(
         viewModel.getProductDetails(productId.toLong())
     }
     val state = viewModel.state.collectAsStateWithLifecycle()
-    val bottomSheetState = rememberModalBottomSheetState(ModalBottomSheetValue.Hidden)
-    val scope = rememberCoroutineScope()
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,        // <<— nếu bạn muốn bỏ qua trạng thái nửa màn hình,
+
+    )
+    var openBottomSheet by remember { mutableStateOf(false) }
+    val coroutineScope = rememberCoroutineScope()
 
     // Điều khiển hiển thị Bottom Sheet
     fun showBottomSheet() {
-        scope.launch {
-            bottomSheetState.show()
+        openBottomSheet = true
+    }
+
+    // State
+    var currentSubProduct by remember { mutableStateOf<SubProductDto?>(null) }
+    val selectedOptions = remember { mutableStateMapOf<String, String>() }
+    val mapOptions = remember { mutableStateMapOf<String, List<String>>() }
+    val mapKeySubProductImages = remember { mutableStateMapOf<String, String>() }
+    val mapSubProducts = remember { mutableStateMapOf<Map<String, String>, SubProductDto>() }
+
+    // Tìm subProduct đúng với selectedOptions
+    fun findMatchingSubProduct(selectedOptions: Map<String, String>): SubProductDto? {
+        return mapSubProducts.entries.firstOrNull { (optionMap, _) ->
+            optionMap.all { (key, value) ->
+                selectedOptions[key] == value
+            }
+        }?.value
+    }
+
+// Build data khi có product
+    LaunchedEffect(state.value.currentProduct) {
+        val product = state.value.currentProduct
+        if (product != null && !product.isSubProduct && product.subProducts != null) {
+            // Tạm thời map để gom các options
+            val tempMap = mutableMapOf<String, MutableSet<String>>()
+
+            // Duyệt qua từng subProduct
+            product.subProducts!!.forEach { subProduct ->
+                val optionMap = mutableMapOf<String, String>()
+
+                subProduct.options?.forEach { option ->
+                    val type = option.optionType?.value ?: return@forEach
+                    val value = option.optionValue ?: return@forEach
+
+                    tempMap.getOrPut(type) { mutableSetOf() }.add(value)
+                    optionMap[type] = value
+
+                    // Nếu có optionKey (ví dụ như Color) thì lưu image cho từng value
+                    if (product.optionKey != null && mapKeySubProductImages[value] == null) {
+                        mapKeySubProductImages[value] = subProduct.images?.firstOrNull() ?: ""
+                    }
+                }
+
+                if (optionMap.isNotEmpty()) {
+                    mapSubProducts[optionMap] = subProduct
+                }
+            }
+
+            // Cập nhật mapOptions và reset selectedOptions
+            mapOptions.clear()
+            tempMap.forEach { (type, values) ->
+                mapOptions[type] = values.toList()
+                selectedOptions[type] = "" // reset ban đầu là rỗng
+            }
         }
     }
+
+
+
 
     Scaffold(
         contentWindowInsets = WindowInsets(0),
@@ -157,180 +232,279 @@ fun ProductDetailsScreen(
             )
         }
     }
-    if (state.value.currentProduct != null) ModalBottomSheet(
-        bottomSheetState,
+    if (openBottomSheet && state.value.currentProduct != null) ProductBottomSheet(
+        sheetState,
+        onDismiss = {
+            openBottomSheet = false
+        },
         state.value.currentProduct!!,
-        onClose = {
-            scope.launch {
-                bottomSheetState.hide()
-            }
-        }
+        coroutineScope,
+        mapOptions,
+        selectedOptions,
+        { type, value ->
+            selectedOptions[type] = value
+            currentSubProduct = findMatchingSubProduct(
+                selectedOptions
+            )
+        },
+        currentSubProduct = currentSubProduct,
+        mapKeySubProductImages
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ModalBottomSheet(
-    bottomSheetState: ModalBottomSheetState,
+fun ProductBottomSheet(
+    sheetState: SheetState,
+    onDismiss: () -> Unit,
     product: ProductDto,
-    onClose: () -> Unit = {}
+    scope: CoroutineScope,
+    mapOptions: Map<String, List<String>>,
+    selectedOptions: Map<String, String>,
+    onSelectedOptionChange: (String, String) -> Unit,
+    currentSubProduct: SubProductDto?,
+    mapKeySubProductImages: Map<String, String>
 ) {
-    val currentSubProduct: SubProductDto? = null;
 
-    ModalBottomSheetLayout(
-        sheetState = bottomSheetState,
-        sheetContent = {
+    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
+    val maxSheetHeight = screenHeight * 0.5f
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        sheetState = sheetState,
+        containerColor = Color.White,
+        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
+
+        modifier = Modifier,
+        content = {
+
             Scaffold(
                 topBar = {
-                    Row(
+                    Column(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 8.dp, horizontal = 8.dp)
-                            .height(110.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                            .fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
 
                     ) {
-                        Column(
-                            modifier = Modifier,
-
-                            ) {
-                            AsyncImage(
-                                model = product.images[0],
-                                contentDescription = null,
-                                modifier = Modifier
-                                    .height(100.dp)
-                                    .width(100.dp)
-                                    .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp)),
-                                contentScale = ContentScale.Fit,
-
-                                )
-
-                        }
-                        Column(
+                        Row(
                             modifier = Modifier
-                                .weight(1f)
-                                .fillMaxSize()
-                                .padding(8.dp),
-                            verticalArrangement = Arrangement.Bottom,
+                                .fillMaxWidth()
+                                .padding(vertical = 8.dp, horizontal = 8.dp)
+                                .height(110.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
 
 
                             ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            Column(
+                                modifier = Modifier,
 
-                            ) {
-                                Text("${
-                                    if (currentSubProduct == null) CurrencyConverter.toVND(
-                                        product.minSellingPrice
-                                    ) + " - "
-                                            + CurrencyConverter.toVND(product.maxMrpPrice) else currentSubProduct.sellingPrice?.let {
-                                        CurrencyConverter.toVND(
-                                            it
+                                ) {
+                                AsyncImage(
+                                    model = currentSubProduct?.images?.firstOrNull()
+                                        ?: product.images.firstOrNull(),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .height(100.dp)
+                                        .width(100.dp)
+                                        .border(
+                                            1.dp,
+                                            Color.LightGray,
+                                            RoundedCornerShape(8.dp)
+                                        ),
+                                    contentScale = ContentScale.Fit,
+
+                                    )
+
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .fillMaxSize()
+                                    .padding(8.dp),
+                                verticalArrangement = Arrangement.Bottom,
+
+
+                                ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                                ) {
+                                    Text("${
+                                        if (currentSubProduct == null) CurrencyConverter.toVND(
+                                            product.minSellingPrice
+                                        ) + " - "
+                                                + CurrencyConverter.toVND(product.maxMrpPrice) else currentSubProduct.sellingPrice?.let {
+                                            CurrencyConverter.toVND(
+                                                it
+                                            )
+                                        }
+                                    }",
+                                        maxLines = 1,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = colorResource(R.color.elegant_gold))
+
+                                    if (currentSubProduct?.mrpPrice != null) {
+                                        Text(
+                                            text = CurrencyConverter.toVND(currentSubProduct.mrpPrice!!),
+                                            style = MaterialTheme.typography.bodyMedium,
+                                            color = Color.Gray,
+                                            textDecoration = TextDecoration.LineThrough,
                                         )
                                     }
-                                }",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    color = colorResource(R.color.elegant_gold))
-                                if (currentSubProduct?.mrpPrice != null) {
-                                    Text(
-                                        text = CurrencyConverter.toVND(currentSubProduct.mrpPrice!!),
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        color = Color.Gray,
-                                        textDecoration = TextDecoration.LineThrough,
-                                    )
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    Text("Storage: ${if (currentSubProduct == null) product.subProducts?.sumOf { it.quantity ?: 0 } else currentSubProduct.quantity}")
                                 }
                             }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            Column(
+                                modifier = Modifier,
                             ) {
-                                    Text("Storage: ${if (currentSubProduct == null) product.subProducts?.sumOf { it.quantity?:0 } else currentSubProduct.quantity}")
+                                IconButton({
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                        if (!sheetState.isVisible) {
+                                            onDismiss()
+                                        }
+                                    }
+                                }) {
+                                    Icon(imageVector = Icons.Default.Close, "")
+                                }
                             }
                         }
-                        Column(
+                        androidx.compose.material.Divider()
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                },
+                bottomBar = {
+
+                    Column {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        androidx.compose.material.Divider()
+                        Button(
+                            {},
                             modifier = Modifier
-                                .padding(8.dp),
-                            verticalArrangement = Arrangement.Bottom,
+                                .padding(8.dp)
+                                .clip(RoundedCornerShape(4.dp))
+                                .fillMaxWidth(),
+                            shape = RoundedCornerShape(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                colorResource(R.color.elegant_gold)
+
+                            ),
+                            enabled = currentSubProduct != null
                         ) {
-                            IconButton({
-                                onClose()
-                            }) {
-                                Icon(imageVector = Icons.Default.Close, "")
-                            }
+                            Text("Add to cart")
                         }
                     }
-                }
+                },
+                modifier = Modifier.heightIn(max = maxSheetHeight) // <<=== QUAN TRỌNG
             ) { innerPadding ->
-                LazyColumn(
-                    modifier = Modifier.padding(innerPadding)
-                ) {
-                    item {
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
-                        Text("e")
 
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(innerPadding)
+
+                ) {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        mapOptions.forEach { (type, values) ->
+                            item {
+                                Text(
+                                    text = type,
+                                    style = MaterialTheme.typography.titleSmall,
+                                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
+                                )
+                                com.google.accompanist.flowlayout.FlowRow(
+                                    mainAxisSpacing = 8.dp,
+                                    crossAxisSpacing = 8.dp,
+                                    modifier = Modifier
+                                        .padding(8.dp)
+                                ) {
+                                    values.forEach { value ->
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(
+                                                    start = 8.dp,
+                                                    bottom = 8.dp,
+                                                    end = 8.dp
+                                                )
+                                                .border(
+                                                    1.dp,
+                                                    if (selectedOptions[type] == value) colorResource(
+                                                        R.color.teal_700
+                                                    )
+                                                    else Color.Transparent,
+                                                    RoundedCornerShape(2.dp)
+                                                )
+                                                .background(
+                                                    Color.LightGray.copy(alpha = 0.3f),
+                                                    RoundedCornerShape(2.dp)
+                                                )
+                                                .clickable {
+                                                    onSelectedOptionChange(
+                                                        type,
+                                                        if (selectedOptions[type] == value) "" else value
+                                                    )
+                                                }
+                                                .clip(RoundedCornerShape(2.dp))
+//                                                .widthIn(min = 80.dp, max = 200.dp),
+
+
+                                        ) {
+
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(2.dp)
+                                            ) {
+                                                if (type == product.optionKey) {
+                                                    AsyncImage(
+                                                        model = mapKeySubProductImages[value],
+                                                        contentDescription = null,
+                                                        modifier = Modifier
+                                                            .height(40.dp)
+                                                            .width(40.dp)
+                                                            .padding(1.dp)
+                                                    )
+                                                }
+                                                Text(
+                                                    value,
+                                                    modifier = Modifier.padding(8.dp),
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = if (selectedOptions[type] == value) colorResource(
+                                                        R.color.teal_700
+                                                    )
+                                                    else Color.Black,
+                                                    maxLines = 1
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+
+
+
+
+
+                                androidx.compose.material.Divider(
+                                    modifier = Modifier.padding(
+                                        vertical = 8.dp
+                                    )
+                                )
+                            }
+                        }
                     }
                 }
             }
-        },
-        content = {
 
-        }
-    )
+
+        },
+
+        )
 }
 
 @Composable
