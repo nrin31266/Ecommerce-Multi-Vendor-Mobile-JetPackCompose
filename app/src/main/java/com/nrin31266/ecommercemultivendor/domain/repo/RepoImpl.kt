@@ -96,6 +96,11 @@ class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
         emit(makeApiCall { apiService.getProducts(category, sort, pageNumber, search) })
     }.flowOn(Dispatchers.IO)
 
+    override fun getProductDetail(id: Long): Flow<ResultState<ProductDto>> = flow{
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getProductDetail(id) })
+    }.flowOn(Dispatchers.IO)
+
 
     private suspend fun <T> makeApiCall(apiCall: suspend () -> T): ResultState<T> {
         return try {

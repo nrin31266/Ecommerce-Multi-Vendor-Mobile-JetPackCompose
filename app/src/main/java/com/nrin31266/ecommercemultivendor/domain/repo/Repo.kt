@@ -33,4 +33,6 @@ interface Repo {
         pageNumber: Int? = null,
         search: String? = null,
     ): Flow<ResultState<PageableDto<ProductDto>>>
+
+    fun getProductDetail(id: Long): Flow<ResultState<ProductDto>>
 }

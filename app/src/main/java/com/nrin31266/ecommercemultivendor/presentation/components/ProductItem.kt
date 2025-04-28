@@ -180,21 +180,7 @@ fun ProductItem(
                         color = colorResource(R.color.elegant_gold)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Box(
-                        modifier = Modifier
-                            .background(
-                                color = colorResource(R.color.error_red).copy(alpha = 0.1f),
-                                shape = RoundedCornerShape(4.dp)
-                            )
-                            .padding(horizontal = 4.dp)
-                    ) {
-                        Text(
-                            text = "-${item.discountPercentage}%",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = colorResource(R.color.error_red),
-                        )
-                    }
+                    DiscountLabel(item.discountPercentage)
 
                 }
                 Spacer(modifier = Modifier.height(2.dp))

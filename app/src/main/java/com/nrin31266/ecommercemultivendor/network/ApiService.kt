@@ -16,6 +16,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.Path
 import retrofit2.http.Query
 
 //fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
@@ -57,6 +58,11 @@ interface ApiService {
         @Query("search") search: String? = null,
 
     ): PageableDto<ProductDto>
+
+    @GET("products/{id}")
+    suspend fun getProductDetail(
+        @Path("id") id: Long,
+    ): ProductDto
 
 
 
