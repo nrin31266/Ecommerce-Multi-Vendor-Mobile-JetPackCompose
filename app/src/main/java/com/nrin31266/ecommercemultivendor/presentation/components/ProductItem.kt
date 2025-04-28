@@ -130,6 +130,7 @@ fun ProductItem(
         subProducts = null,
         avgRating = 4.5
     ),
+
 ) {
     Card(
         modifier = Modifier
@@ -174,7 +175,9 @@ fun ProductItem(
                 Row (verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = CurrencyConverter.toVND(item.minSellingPrice) ,
-                        style = MaterialTheme.typography.bodyMedium
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorResource(R.color.elegant_gold)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     Box(

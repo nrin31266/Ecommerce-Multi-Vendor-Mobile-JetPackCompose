@@ -23,7 +23,7 @@ sealed class CustomerRoutes(val route: String){
 
 
     data object ProductDetailScreen : CustomerRoutes("product_detail_screen/{productId}") {
-        fun withPath(productId: String): String {
+        fun withPath(productId: Long): String {
             return "product_detail_screen/$productId"
         }
     }

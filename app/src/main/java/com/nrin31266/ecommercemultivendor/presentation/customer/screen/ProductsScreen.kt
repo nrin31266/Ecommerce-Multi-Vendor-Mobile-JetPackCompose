@@ -1,5 +1,6 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
+import android.graphics.drawable.Icon
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,6 +20,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FilterAlt
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -99,7 +102,12 @@ fun ProductsScreen(
                             navController.navigate(CustomerRoutes.SearchScreen.route)
                         }
                     }, hint = search?:"Search now...")
-                }
+                },
+                onActionClick = {
+
+                },
+                actionIcon = Icons.Default.FilterAlt
+
             )
         },
         contentWindowInsets = WindowInsets(0)
@@ -128,7 +136,9 @@ fun ProductsScreen(
                             ProductItem(
                                 item = product,
                                 onClick = {
-                                    // TODO: Điều hướng qua ProductDetailScreen nếu cần
+                                    if(product.id!= null){
+                                        navController.navigate(CustomerRoutes.ProductDetailScreen.withPath(product.id!!))
+                                    }
                                 }
                             )
                         }
