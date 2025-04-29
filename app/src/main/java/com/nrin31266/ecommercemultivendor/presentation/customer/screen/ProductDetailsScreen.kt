@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.indication
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,17 +28,22 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Card
 import androidx.compose.material.ExperimentalMaterialApi
 
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Chat
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.ripple.rememberRipple
 
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
@@ -69,6 +75,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
@@ -126,19 +133,26 @@ fun ProductDetailsScreen(
     val selectedOptions = remember { mutableStateMapOf<String, String>() }
     val mapOptions = remember { mutableStateMapOf<String, List<String>>() }
     val mapKeySubProductImages = remember { mutableStateMapOf<String, String>() }
-    val mapSubProducts = remember { mutableStateMapOf<Map<String, String>, SubProductDto>() }
+    val mapSubProducts = remember { mutableStateMapOf<String, SubProductDto>() }
+    val mapKeyToOptionMap = remember { mutableStateMapOf<String, Map<String, String>>() }
+
+    fun optionKeyString(optionMap: Map<String, String>): String =
+        optionMap.entries.sortedBy { it.key }.joinToString("|") { "${it.key}:${it.value}" }
+
 
     // Tìm subProduct đúng với selectedOptions
     fun findMatchingSubProduct(selectedOptions: Map<String, String>): SubProductDto? {
-        return mapSubProducts.entries.firstOrNull { (optionMap, _) ->
-            optionMap.all { (key, value) ->
-                selectedOptions[key] == value
-            }
-        }?.value
+        return mapSubProducts[optionKeyString(selectedOptions)]
     }
 
 // Build data khi có product
     LaunchedEffect(state.value.currentProduct) {
+        currentSubProduct = null
+        selectedOptions.clear()
+        mapOptions.clear()
+        mapKeySubProductImages.clear()
+        mapSubProducts.clear()
+        mapKeyToOptionMap.clear()
         val product = state.value.currentProduct
         if (product != null && !product.isSubProduct && product.subProducts != null) {
             // Tạm thời map để gom các options
@@ -162,18 +176,23 @@ fun ProductDetailsScreen(
                 }
 
                 if (optionMap.isNotEmpty()) {
-                    mapSubProducts[optionMap] = subProduct
+                    val optionKey = optionKeyString(optionMap);
+                    mapSubProducts[optionKey] = subProduct
+                    mapKeyToOptionMap[optionKey] = optionMap
                 }
+
             }
 
             // Cập nhật mapOptions và reset selectedOptions
             mapOptions.clear()
             tempMap.forEach { (type, values) ->
                 mapOptions[type] = values.toList()
-                selectedOptions[type] = "" // reset ban đầu là rỗng
             }
         }
     }
+
+    // Stock
+    var quantity by rememberSaveable { mutableIntStateOf(1) }
 
 
 
@@ -242,13 +261,20 @@ fun ProductDetailsScreen(
         mapOptions,
         selectedOptions,
         { type, value ->
-            selectedOptions[type] = value
+            if (value == "") selectedOptions.remove(type) else selectedOptions[type] = value
             currentSubProduct = findMatchingSubProduct(
                 selectedOptions
             )
         },
         currentSubProduct = currentSubProduct,
-        mapKeySubProductImages
+        mapKeySubProductImages,
+        mapSubProducts,
+        mapKeyToOptionMap,
+        //
+        quantity,
+        {
+            quantity = it
+        }
     )
 }
 
@@ -263,11 +289,37 @@ fun ProductBottomSheet(
     selectedOptions: Map<String, String>,
     onSelectedOptionChange: (String, String) -> Unit,
     currentSubProduct: SubProductDto?,
-    mapKeySubProductImages: Map<String, String>
+    mapKeySubProductImages: Map<String, String>,
+    mapSubProducts: Map<String, SubProductDto>,
+    mapKeyToOptionMap: Map<String, Map<String, String>>,
+    quantity: Int,
+    onQuantityChange: (Int) -> Unit
 ) {
 
+
+    fun isOptionAvailable(type: String, value: String): Boolean {
+        if (selectedOptions[type] == value) return true
+
+        // Tạo bản sao tạm thời với lựa chọn được cập nhật
+        val tempSelection = selectedOptions.toMutableMap().apply {
+            this[type] = value
+        }
+
+        // Duyệt tất cả key trong mapSubProducts
+        return mapSubProducts.entries.any { (keyString, subProduct) ->
+
+            val optionMap = mapKeyToOptionMap[keyString] ?: return@any false
+
+            // Kiểm tra xem optionMap có chứa hết tempSelection không
+            optionMap.all { (k, v) ->
+                tempSelection[k] == v || !tempSelection.containsKey(k)
+            } && (subProduct.quantity ?: 0) > 0 && (subProduct.quantity ?: 0) >= quantity
+        }
+    }
+
+
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val maxSheetHeight = screenHeight * 0.5f
+    val maxSheetHeight = screenHeight * 0.7f
     ModalBottomSheet(
         onDismissRequest = onDismiss,
         sheetState = sheetState,
@@ -299,8 +351,14 @@ fun ProductBottomSheet(
 
                                 ) {
                                 AsyncImage(
-                                    model = currentSubProduct?.images?.firstOrNull()
-                                        ?: product.images.firstOrNull(),
+                                    model = if (product.optionKey != null) {
+                                        val selectedValue = selectedOptions[product.optionKey]
+                                        val imageUrl = mapKeySubProductImages[selectedValue]
+                                        imageUrl ?: product.images.firstOrNull()
+                                    } else {
+                                        product.images.firstOrNull()
+                                    },
+
                                     contentDescription = null,
                                     modifier = Modifier
                                         .height(100.dp)
@@ -330,6 +388,13 @@ fun ProductBottomSheet(
 
                                 ) {
                                     Text("${
+                                        if(product.isSubProduct){
+                                            product.subProducts?.get(0)?.sellingPrice?.let {
+                                                CurrencyConverter.toVND(
+                                                    it
+                                                )
+                                            }
+                                        }else
                                         if (currentSubProduct == null) CurrencyConverter.toVND(
                                             product.minSellingPrice
                                         ) + " - "
@@ -388,21 +453,33 @@ fun ProductBottomSheet(
                             modifier = Modifier
                                 .padding(8.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .fillMaxWidth(),
+                                .fillMaxWidth()
+                                .height(54.dp),
                             shape = RoundedCornerShape(4.dp),
                             colors = ButtonDefaults.buttonColors(
                                 colorResource(R.color.elegant_gold)
 
                             ),
-                            enabled = currentSubProduct != null
+                            enabled =
+                            if (product.isSubProduct) {
+                                quantity > 0 && quantity <= (product.subProducts?.get(0)?.quantity
+                                    ?: 0)
+                            } else {
+                                currentSubProduct != null &&
+                                        quantity > 0 &&
+                                        quantity <= (currentSubProduct.quantity ?: 0)
+                            }
                         ) {
-                            Text("Add to cart")
+                            Text(
+                                "Add to cart",
+                                color = Color.White,
+                                style = MaterialTheme.typography.titleMedium
+                            )
                         }
                     }
                 },
                 modifier = Modifier.heightIn(max = maxSheetHeight) // <<=== QUAN TRỌNG
             ) { innerPadding ->
-
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -414,6 +491,7 @@ fun ProductBottomSheet(
                     ) {
                         mapOptions.forEach { (type, values) ->
                             item {
+
                                 Text(
                                     text = type,
                                     style = MaterialTheme.typography.titleSmall,
@@ -426,6 +504,7 @@ fun ProductBottomSheet(
                                         .padding(8.dp)
                                 ) {
                                     values.forEach { value ->
+                                        val isAvailable = isOptionAvailable(type, value)
                                         Box(
                                             modifier = Modifier
                                                 .padding(
@@ -442,10 +521,12 @@ fun ProductBottomSheet(
                                                     RoundedCornerShape(2.dp)
                                                 )
                                                 .background(
-                                                    Color.LightGray.copy(alpha = 0.3f),
+                                                    if (isAvailable) Color.LightGray.copy(alpha = 0.3f) else Color.LightGray,
                                                     RoundedCornerShape(2.dp)
                                                 )
-                                                .clickable {
+                                                .clickable(
+                                                    enabled = isAvailable
+                                                ) {
                                                     onSelectedOptionChange(
                                                         type,
                                                         if (selectedOptions[type] == value) "" else value
@@ -468,14 +549,21 @@ fun ProductBottomSheet(
                                                         modifier = Modifier
                                                             .height(40.dp)
                                                             .width(40.dp)
-                                                            .padding(1.dp)
-                                                    )
+                                                            .padding(start = 4.dp)
+                                                            .clip(
+                                                                RoundedCornerShape(4.dp)
+                                                            )
+                                                            .background(
+                                                                Color.Transparent
+                                                            ),
+
+                                                        )
                                                 }
                                                 Text(
                                                     value,
                                                     modifier = Modifier.padding(8.dp),
                                                     style = MaterialTheme.typography.bodyMedium,
-                                                    color = if (selectedOptions[type] == value) colorResource(
+                                                    color = if (!isAvailable) Color.Gray else if (selectedOptions[type] == value) colorResource(
                                                         R.color.teal_700
                                                     )
                                                     else Color.Black,
@@ -496,6 +584,105 @@ fun ProductBottomSheet(
                                     )
                                 )
                             }
+
+                        }
+                        item {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(12.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween // Quantity trái, icon phải
+                            ) {
+                                // Cột bên trái
+                                Column {
+                                    Text(
+                                        "Quantity:",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                }
+
+                                Box {
+                                    // Nội dung chính
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier
+                                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
+                                    ) {
+                                        IconButton(
+                                            onClick = {
+                                                if (quantity > 1) onQuantityChange(quantity - 1)
+                                            },
+                                            enabled = (currentSubProduct != null || product.isSubProduct) &&
+                                                    quantity > 1
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Remove,
+                                                contentDescription = null
+                                            )
+                                        }
+
+                                        Box(
+                                            modifier = Modifier
+                                                .background(Color.LightGray)
+                                                .width(1.dp)
+                                                .height(46.dp)
+                                        )
+
+                                        Text(
+                                            quantity.toString(),
+                                            style = MaterialTheme.typography.titleMedium,
+                                            fontWeight = FontWeight.SemiBold,
+                                            modifier = Modifier.padding(horizontal = 24.dp),
+                                            color = colorResource(R.color.elegant_gold)
+                                        )
+
+                                        Box(
+                                            modifier = Modifier
+                                                .background(Color.LightGray)
+                                                .width(1.dp)
+                                                .height(46.dp)
+                                        )
+
+                                        IconButton(
+                                            onClick = {
+                                                onQuantityChange(quantity + 1)
+                                            }, enabled = if (product.isSubProduct) {
+
+                                                quantity < (product.subProducts?.get(0)?.quantity
+                                                    ?: 0)
+
+                                            } else {
+                                                quantity < (currentSubProduct?.quantity ?: 0)
+
+                                            }
+
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Add,
+                                                contentDescription = null
+                                            )
+                                        }
+                                    }
+
+                                    // Lớp phủ + chặn tương tác
+                                    if (currentSubProduct == null && !product.isSubProduct) {
+                                        Box(
+                                            modifier = Modifier
+                                                .matchParentSize()
+                                                .background(
+                                                    Color.LightGray.copy(0.5f),
+                                                    RoundedCornerShape(8.dp)
+                                                )
+                                                .clip(RoundedCornerShape(8.dp)) // Màu xám mờ
+                                                .pointerInput(Unit) {} // Ngăn người dùng tương tác
+                                        )
+                                    }
+                                }
+                            }
+
+
                         }
                     }
                 }
