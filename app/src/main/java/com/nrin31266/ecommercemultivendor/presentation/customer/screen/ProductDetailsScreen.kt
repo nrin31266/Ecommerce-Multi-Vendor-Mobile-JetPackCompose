@@ -31,6 +31,7 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ImagesSlider
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,9 +39,13 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel = hiltViewModel(),
     navController: NavController,
-    productId: String
+    productId: String,
+    authViewModel: AuthViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
+        navController.currentBackStackEntry?.destination?.route?.let {
+            Log.d("NavController", "Current route: $it")
+        }
         Log.d("ProductDetailsScreen", "Product ID: $productId")
         viewModel.getProductDetails(productId.toLong())
     }
@@ -49,6 +54,7 @@ fun ProductDetailsScreen(
         skipPartiallyExpanded = true,        // <<— nếu bạn muốn bỏ qua trạng thái nửa màn hình,
 //        confirmValueChange = { it != SheetValue.Hidden }
     )
+    val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -134,7 +140,9 @@ fun ProductDetailsScreen(
             state.value.quantity,
             {
                 viewModel.updateQuantity(it)
-            }
+            },
+            authState.value.isLogin,
+            navController
         )
     }
 }

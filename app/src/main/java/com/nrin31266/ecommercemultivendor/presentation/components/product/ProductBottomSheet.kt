@@ -46,11 +46,13 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
+import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -69,7 +71,9 @@ fun ProductBottomSheet(
     mapSubProducts: Map<String, SubProductDto>,
     mapKeyToOptionMap: Map<String, Map<String, String>>,
     quantity: Int,
-    onQuantityChange: (Int) -> Unit
+    onQuantityChange: (Int) -> Unit,
+    isLogin : Boolean,
+    navController: NavController
 ) {
 
 
@@ -234,7 +238,20 @@ fun ProductBottomSheet(
                         Spacer(modifier = Modifier.height(8.dp))
                         androidx.compose.material.Divider()
                         Button(
-                            {},
+                            {
+                                if(!isLogin){
+                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                        if (!sheetState.isVisible) {
+                                            onDismiss()
+                                        }
+                                    }
+                                    navController.navigate(CustomerRoutes.CustomerLoginScreen.withRedirect(
+                                        CustomerRoutes.ProductDetailScreen.withPath(product.id!!)
+                                    ))
+                                }else{
+                                    // Xu li them vao gio
+                                }
+                            },
                             modifier = Modifier
                                 .padding(8.dp)
                                 .clip(RoundedCornerShape(4.dp))

@@ -1,5 +1,6 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -11,17 +12,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Password
-import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Storefront
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -45,13 +41,13 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTextField
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 import com.nrin31266.ecommercemultivendor.presentation.utils.TextDivider
-import kotlinx.coroutines.delay
 
 
 @Composable
 fun LoginScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
+    redirect: String?
 ) {
     val state = authViewModel.userAuthState.collectAsStateWithLifecycle()
 
@@ -60,15 +56,27 @@ fun LoginScreen(
     val context = LocalContext.current
 
     LaunchedEffect (Unit){
+        // Log các màn hình hiện tại trong back stack
+        navController.currentBackStackEntry?.destination?.route?.let {
+            Log.d("NavController", "Current route: $it")
+        }
+
+
+
         state.value.let {
             email = it.currentEmail ?: ""
         }
         authViewModel.authEvent.collect { event ->
             when (event) {
                 is AuthEvent.NavigateToHome -> {
-                    navController.navigate(CustomerRoutes.CustomerHomeScreen.route) {
+                    navController.navigate(redirect ?: CustomerRoutes.CustomerHomeScreen.route) {
+
+
                         popUpTo(CustomerRoutes.CustomerLoginScreen.route) { inclusive = true }
+                        popUpTo(CustomerRoutes.ProductDetailScreen.route) { inclusive = true }
                     }
+
+
                 }
                 is AuthEvent.ShowSnackbar -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()

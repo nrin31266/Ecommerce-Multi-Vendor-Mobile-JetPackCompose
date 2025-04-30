@@ -9,8 +9,16 @@ sealed class SubNavigation(val route: String) {
 }
 
 sealed class CustomerRoutes(val route: String){
-    data object CustomerLoginScreen : CustomerRoutes("customer_login_screen")
-    data object CustomerSignupScreen : CustomerRoutes("customer_signup_screen")
+    data object CustomerLoginScreen : CustomerRoutes("customer_login_screen?redirect={redirect}"){
+        fun withRedirect(redirect: String): String {
+            return "customer_login_screen?redirect=$redirect"
+        }
+    }
+    data object CustomerSignupScreen : CustomerRoutes("customer_signup_screen"){
+        fun withRedirect(redirect: String): String {
+            return "customer_signup_screen?redirect=$redirect"
+        }
+    }
     data object CustomerHomeScreen : CustomerRoutes("customer_home_screen")
     data object CustomerAccountScreen : CustomerRoutes("customer_account_screen")
     data object CustomerOrdersScreen : CustomerRoutes("customer_orders_screen")
