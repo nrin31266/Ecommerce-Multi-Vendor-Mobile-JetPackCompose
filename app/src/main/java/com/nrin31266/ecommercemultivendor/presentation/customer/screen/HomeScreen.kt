@@ -47,20 +47,18 @@ fun HomeScreen(
 
     Scaffold(
         topBar = {
-           CustomTopBar(extraContent = {
-               Box(modifier = Modifier.padding(horizontal = 8.dp)){
-                   Row (modifier = Modifier, horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                       SearchBar({
-                           navController.navigate(CustomerRoutes.SearchScreen.route) {
-                               popUpTo(CustomerRoutes.CustomerHomeScreen.route) { inclusive = false }
-                               launchSingleTop = true
-                           }
-                       }, modifier = Modifier.weight(1f))
-                       Spacer(modifier = Modifier.size(8.dp))
-                       TightIconButton({}, icon = Icons.Default.ShoppingCart, badgeCount = 9)
-                   }
+           CustomTopBar(content = {
+               Row (modifier = Modifier, horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+                   SearchBar({
+                       navController.navigate(CustomerRoutes.SearchScreen.route) {
+                           popUpTo(CustomerRoutes.CustomerHomeScreen.route) { inclusive = false }
+                           launchSingleTop = true
+                       }
+                   }, modifier = Modifier.weight(1f))
                }
-           }
+           },
+               actionIcon = Icons.Default.ShoppingCart,
+               onActionClick = {}
            )
         },
         contentWindowInsets = WindowInsets(0),

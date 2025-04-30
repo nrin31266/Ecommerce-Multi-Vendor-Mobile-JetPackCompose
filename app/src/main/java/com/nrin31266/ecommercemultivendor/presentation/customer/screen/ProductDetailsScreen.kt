@@ -58,18 +58,8 @@ fun ProductDetailsScreen(
         skipPartiallyExpanded = true,        // <<— nếu bạn muốn bỏ qua trạng thái nửa màn hình,
 //        confirmValueChange = { it != SheetValue.Hidden }
     )
-    var openBottomSheet by remember { mutableStateOf(false) }
+
     val coroutineScope = rememberCoroutineScope()
-
-    fun showBottomSheet() {
-        openBottomSheet = true
-    }
-
-
-
-
-
-
 
 
     Scaffold(
@@ -77,7 +67,7 @@ fun ProductDetailsScreen(
         bottomBar = {
             if (state.value.currentProduct != null) ProductDetailsBottomBar(
                 state.value.currentProduct!!,
-                onAddToCartClick = { showBottomSheet() })
+                onAddToCartClick = { viewModel.changeIsSheetBottom() })
         }
     ) { innerPadding ->
         Box(
@@ -133,11 +123,11 @@ fun ProductDetailsScreen(
     val mapKeyToOptionMap = viewModel.mapKeyToOptionMap
     val currentSubProductState = viewModel.currentSubProduct.collectAsStateWithLifecycle()
 
-    if(openBottomSheet && state.value.currentProduct != null) {
+    if(state.value.isOpenSheetBottom && state.value.currentProduct != null) {
         ProductBottomSheet(
             sheetState,
             onDismiss = {
-                openBottomSheet = false
+                viewModel.changeIsSheetBottom()
             },
             state.value.currentProduct!!,
             coroutineScope,

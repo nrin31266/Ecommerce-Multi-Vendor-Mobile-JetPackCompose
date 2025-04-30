@@ -1,18 +1,12 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
 import com.nrin31266.ecommercemultivendor.domain.usecase.products.GetProductDetailsUseCase
-import com.nrin31266.ecommercemultivendor.domain.usecase.products.GetProductUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -52,7 +46,8 @@ class ProductDetailsViewModel @Inject constructor(
                         _state.value = _state.value.copy(
                             currentProduct = product,
                             isLoading = false,
-                            quantity = 1
+                            quantity = 1,
+                            isOpenSheetBottom = false
                         )
                     }
 
@@ -74,6 +69,10 @@ class ProductDetailsViewModel @Inject constructor(
 
     fun updateQuantity(quantity: Int) {
         _state.value = _state.value.copy(quantity = quantity)
+    }
+
+    fun changeIsSheetBottom() {
+        _state.value = _state.value.copy(isOpenSheetBottom = !_state.value.isOpenSheetBottom)
     }
 
 
@@ -135,6 +134,7 @@ data class ProductDetailsState(
     var errorMessage: String? = null,
     var currentProduct: ProductDto? = null,
     var favCurrentProduct: Boolean = true,
-    var quantity: Int = 1
+    var quantity: Int = 1,
+    var isOpenSheetBottom: Boolean = false,
 
 )
