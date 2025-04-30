@@ -45,6 +45,7 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
@@ -72,7 +73,7 @@ fun ProductBottomSheet(
     mapKeyToOptionMap: Map<String, Map<String, String>>,
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
-    isLogin : Boolean,
+    isLogin: Boolean,
     navController: NavController
 ) {
 
@@ -151,7 +152,8 @@ fun ProductBottomSheet(
                                             1.dp,
                                             Color.LightGray,
                                             RoundedCornerShape(8.dp)
-                                        ).clip(RoundedCornerShape(8.dp)) // Cắt ảnh bo góc
+                                        )
+                                        .clip(RoundedCornerShape(8.dp)) // Cắt ảnh bo góc
                                         .background(Color.Transparent, RoundedCornerShape(8.dp)),
                                     contentScale = ContentScale.Fit,
 
@@ -170,9 +172,9 @@ fun ProductBottomSheet(
                                 ) {
                                 Row(
                                     verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp),
 
-                                ) {
+                                    ) {
                                     Text("${
                                         if (product.isSubProduct) {
                                             product.subProducts?.get(0)?.sellingPrice?.let {
@@ -191,9 +193,10 @@ fun ProductBottomSheet(
                                             }
                                     }",
                                         maxLines = 1,
-                                        style = MaterialTheme.typography.titleMedium,
+                                        style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = colorResource(R.color.elegant_gold))
+                                        color = colorResource(R.color.elegant_gold)
+                                    )
 
                                     if (currentSubProduct?.mrpPrice != null) {
                                         Text(
@@ -201,6 +204,8 @@ fun ProductBottomSheet(
                                             style = MaterialTheme.typography.bodyMedium,
                                             color = Color.Gray,
                                             textDecoration = TextDecoration.LineThrough,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
                                         )
                                     }
                                 }
@@ -208,7 +213,8 @@ fun ProductBottomSheet(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    Text("Storage: ${if (currentSubProduct == null) product.subProducts?.sumOf { it.quantity ?: 0 } else currentSubProduct.quantity}")
+                                    Text("Storage: ${if (currentSubProduct == null) product.subProducts?.sumOf { it.quantity ?: 0 } else currentSubProduct.quantity},",
+                                        style = MaterialTheme.typography.bodyMedium,)
                                 }
                             }
                             Column(
@@ -232,23 +238,28 @@ fun ProductBottomSheet(
                 },
                 bottomBar = {
 
-                    Column (
-                        Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding())
-                    ){
+                    Column(
+                        Modifier.padding(
+                            bottom = WindowInsets.navigationBars.asPaddingValues()
+                                .calculateBottomPadding()
+                        )
+                    ) {
                         Spacer(modifier = Modifier.height(8.dp))
                         androidx.compose.material.Divider()
                         Button(
                             {
-                                if(!isLogin){
+                                if (!isLogin) {
                                     scope.launch { sheetState.hide() }.invokeOnCompletion {
                                         if (!sheetState.isVisible) {
                                             onDismiss()
                                         }
                                     }
-                                    navController.navigate(CustomerRoutes.CustomerLoginScreen.withRedirect(
-                                        CustomerRoutes.ProductDetailScreen.withPath(product.id!!)
-                                    ))
-                                }else{
+                                    navController.navigate(
+                                        CustomerRoutes.CustomerLoginScreen.withRedirect(
+                                            CustomerRoutes.ProductDetailScreen.withPath(product.id!!)
+                                        )
+                                    )
+                                } else {
                                     // Xu li them vao gio
                                 }
                             },

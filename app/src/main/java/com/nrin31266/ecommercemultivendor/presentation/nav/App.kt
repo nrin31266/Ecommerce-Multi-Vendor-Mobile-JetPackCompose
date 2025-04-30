@@ -176,30 +176,30 @@ fun App(
                         ProductDetailsScreen(productId = productId!!, navController = navController)
                     }
 
-                    composable(CustomerRoutes.CustomerSignupScreen.route) {
-                        SignupScreen(navController)
-                    }
-                    composable(
-                        route = CustomerRoutes.CustomerLoginScreen.route,
-                        arguments = listOf(
-                            navArgument("redirect") {
-                                type = NavType.StringType
-                                nullable = true
-                                defaultValue = null
-                            }
-                        )
-                    ) { backStackEntry ->
-                        val redirect = backStackEntry.arguments?.getString("redirect")
 
-                        LoginScreen(
-                            navController = navController,
-                            redirect = redirect
-                        )
-                    }
 
                 }
 
+                composable(CustomerRoutes.CustomerSignupScreen.route) {
+                    SignupScreen(navController)
+                }
+                composable(
+                    route = CustomerRoutes.CustomerLoginScreen.route,
+                    arguments = listOf(
+                        navArgument("redirect") {
+                            type = NavType.StringType
+                            nullable = true
+                            defaultValue = null
+                        }
+                    )
+                ) { backStackEntry ->
+                    val redirect = backStackEntry.arguments?.getString("redirect")
 
+                    LoginScreen(
+                        navController = navController,
+                        redirect = redirect
+                    )
+                }
 
 
             }

@@ -1,9 +1,11 @@
 package com.nrin31266.ecommercemultivendor.network
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
+import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
@@ -16,6 +18,7 @@ import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
+import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
@@ -64,7 +67,12 @@ interface ApiService {
         @Path("id") id: Long,
     ): ProductDto
 
-
+    @PUT("api/cart/add/{productId}/item/{subProductId}")
+    suspend fun addToCart(
+        @Path("productId") productId: Long,
+        @Path("subProductId") subProductId: Long,
+        @Body request: AddUpdateCartItemRequest
+    ): CartItemDto
 
 
 }

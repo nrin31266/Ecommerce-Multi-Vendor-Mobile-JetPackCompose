@@ -1,6 +1,7 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
@@ -20,10 +21,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProductsViewModel @Inject constructor(
-    val getProductUseCase: GetProductUseCase
+    val getProductUseCase: GetProductUseCase,
+    private val savedStateHandle: SavedStateHandle,  // ← Thêm dòng này
 ) : ViewModel() {
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
+
+    init {
+//        "shoes"	"shoes"
+//        ""	null
+//        " "	null
+//        null	null
+        val search = savedStateHandle.get<String>("search")?.takeIf { it.isNotBlank() }
+        val category = savedStateHandle.get<String>("category")?.takeIf { it.isNotBlank() }
+        val sort = savedStateHandle.get<String>("sort")?.takeIf { it.isNotBlank() }
+
+        getProduct(search, category, sort)
+    }
 
     fun getProduct(search: String? = null, category: String? = null, sort: String? = null) {
         viewModelScope.launch {

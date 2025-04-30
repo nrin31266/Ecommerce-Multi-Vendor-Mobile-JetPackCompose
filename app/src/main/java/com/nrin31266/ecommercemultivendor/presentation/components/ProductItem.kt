@@ -134,7 +134,7 @@ fun ProductItem(
 ) {
     Card(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(0.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -152,7 +152,7 @@ fun ProductItem(
                     .fillMaxWidth()
             )
 
-            Column(modifier = Modifier.padding(12.dp)) {
+            Column(modifier = Modifier.padding(6.dp)) {
                 // Tiêu đề
                 Text(
                     text = item.title,
@@ -175,9 +175,12 @@ fun ProductItem(
                 Row (verticalAlignment = Alignment.CenterVertically) {
                     Text(
                         text = CurrencyConverter.toVND(item.minSellingPrice) ,
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = colorResource(R.color.elegant_gold)
+                        color = colorResource(R.color.elegant_gold),
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 1
                     )
                     Spacer(modifier = Modifier.width(8.dp))
                     DiscountLabel(item.discountPercentage)

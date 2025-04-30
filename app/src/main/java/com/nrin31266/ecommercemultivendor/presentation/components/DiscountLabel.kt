@@ -25,7 +25,7 @@ fun DiscountLabel(
     textColor: Color = MaterialTheme.colorScheme.error, // Màu chữ (mặc định là đỏ)
     backgroundColor: Color = MaterialTheme.colorScheme.error.copy(alpha = 0.1f), // Màu nền (mặc định là đỏ nhạt)
     cornerRadius: Dp = 4.dp, // Bo góc
-    fontSize: TextUnit = 12.sp, // Cỡ chữ
+    fontSize: TextUnit = 10.sp, // Cỡ chữ
     horizontalPadding: Dp = 4.dp, // Padding ngang
     verticalPadding: Dp = 0.dp // Padding dọc
 ) {
@@ -35,13 +35,16 @@ fun DiscountLabel(
                 color = backgroundColor,
                 shape = RoundedCornerShape(cornerRadius)
             )
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding)
+            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+
     ) {
         Text(
             text = "-$discountPercentage%", // Hiển thị giá trị giảm giá
             fontSize = fontSize,
             fontWeight = FontWeight.Bold,
-            color = textColor
+            color = textColor,
+            maxLines = 1,
+
         )
     }
 }

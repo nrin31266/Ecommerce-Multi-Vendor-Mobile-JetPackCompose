@@ -65,7 +65,7 @@ fun ProductsScreen(
 
     LaunchedEffect(Unit) {
         Log.d("ProductsScreen", "Query: $search, Category: $category, Sort: $sort")
-        viewModel.getProduct(search, category, sort)
+//        viewModel.getProduct(search, category, sort)
     }
 
     // Theo dõi động vị trí cuộn, trigger loadMore mỗi khi cuối danh sách
@@ -129,8 +129,8 @@ fun ProductsScreen(
                         state = gridState,
                         modifier = Modifier.fillMaxSize(),
                         contentPadding = PaddingValues(4.dp),
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         itemsIndexed(state.value.products) { index, product ->
                             ProductItem(
@@ -153,7 +153,7 @@ fun ProductsScreen(
                                     .padding(8.dp)
                             ){
                                 // Hiển thị loading more ở cuối nếu đang load thêm
-                                if(state.value.isLoadMoreLoading == true){
+                                if(state.value.isLoadMoreLoading){
                                     Row (modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.Center){
                                         CircularProgressIndicator(
                                             color = colorResource(R.color.warning_orange),

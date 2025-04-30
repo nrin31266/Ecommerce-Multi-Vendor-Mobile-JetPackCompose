@@ -58,7 +58,7 @@ fun ProductDetailsContent(
                 ) {
                     Text(
                         CurrencyConverter.toVND(product.minSellingPrice),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = colorResource(R.color.elegant_gold),
                         fontWeight = FontWeight.Bold
                     )
@@ -73,7 +73,8 @@ fun ProductDetailsContent(
             }
 
             Column(
-                modifier = Modifier.align(Alignment.TopEnd)
+                modifier = Modifier.align(Alignment.TopEnd),
+                verticalArrangement = Arrangement.Center
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

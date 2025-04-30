@@ -61,19 +61,22 @@ fun ImagesSlider(
                 )
             }
 
-            // Text hiển thị số lượng ảnh, nằm góc dưới bên phải
-            Text(
-                text = "${pagerState.currentPage + 1}/${images.size}",
-                color = Color.Gray,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Bold,
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(8.dp)
-                    .background(Color.White.copy(alpha = 0.4f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp).border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-                    .padding(start = 8.dp, end = 8.dp)
-            )
+                    .background(Color.White.copy(alpha = 0.4f), shape = RoundedCornerShape(8.dp))
+                    .border(1.dp, Color.LightGray, shape = RoundedCornerShape(8.dp))
+                    .padding(horizontal = 8.dp, vertical = 4.dp)
+            ) {
+                Text(
+                    text = "${pagerState.currentPage + 1}/${images.size}",
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+
         }
 
         Spacer(modifier = Modifier.height(8.dp))
