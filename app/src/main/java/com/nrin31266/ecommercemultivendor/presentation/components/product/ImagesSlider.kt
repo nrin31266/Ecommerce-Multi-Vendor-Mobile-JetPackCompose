@@ -1,4 +1,4 @@
-package com.nrin31266.ecommercemultivendor.presentation.utils
+package com.nrin31266.ecommercemultivendor.presentation.components.product
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -18,9 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState

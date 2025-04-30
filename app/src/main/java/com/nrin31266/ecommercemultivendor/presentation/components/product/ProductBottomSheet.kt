@@ -95,7 +95,7 @@ fun ProductBottomSheet(
 
 
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val maxSheetHeight = screenHeight * 0.7f
+    val maxSheetHeight = screenHeight * 0.8f
     ModalBottomSheet(
         windowInsets = WindowInsets(0),
         onDismissRequest = onDismiss,
@@ -147,7 +147,7 @@ fun ProductBottomSheet(
                                             1.dp,
                                             Color.LightGray,
                                             RoundedCornerShape(8.dp)
-                                        )
+                                        ).clip(RoundedCornerShape(8.dp)) // Cắt ảnh bo góc
                                         .background(Color.Transparent, RoundedCornerShape(8.dp)),
                                     contentScale = ContentScale.Fit,
 
@@ -306,7 +306,7 @@ fun ProductBottomSheet(
                                                     RoundedCornerShape(2.dp)
                                                 )
                                                 .background(
-                                                    if (isAvailable) Color.LightGray.copy(alpha = 0.3f) else Color.LightGray,
+                                                    if (isAvailable) Color.LightGray.copy(alpha = 0.2f) else Color.LightGray,
                                                     RoundedCornerShape(2.dp)
                                                 )
                                                 .clickable(
@@ -341,6 +341,7 @@ fun ProductBottomSheet(
                                                             .background(
                                                                 Color.Transparent
                                                             ),
+
 
                                                         )
                                                 }

@@ -2,7 +2,6 @@ package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
 
 import android.util.Log
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Spacer
@@ -12,18 +11,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateMapOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,15 +22,15 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductBottomSheet
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsBottomBar
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsContent
+import com.nrin31266.ecommercemultivendor.presentation.components.seller.SellerCardItem
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProductDetailsViewModel
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
-import com.nrin31266.ecommercemultivendor.presentation.utils.ImagesSlider
+import com.nrin31266.ecommercemultivendor.presentation.components.product.ImagesSlider
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,8 +89,11 @@ fun ProductDetailsScreen(
                             androidx.compose.material.Divider()
                             Spacer(modifier = Modifier.height(8.dp))
                         }
-
-
+                        if(product.seller!=null){
+                            item {
+                                SellerCardItem(navController, product.seller!!)
+                            }
+                        }
                     }
                 }
 
@@ -116,12 +110,9 @@ fun ProductDetailsScreen(
             )
         }
     }
-    val mapOptions = viewModel.mapOptions
-    val selectedOptions = viewModel.selectedOptions
-    val mapSubProducts = viewModel.mapSubProducts
-    val mapKeySubProductImages = viewModel.mapKeySubProductImages
-    val mapKeyToOptionMap = viewModel.mapKeyToOptionMap
+
     val currentSubProductState = viewModel.currentSubProduct.collectAsStateWithLifecycle()
+    val optionState = viewModel.productOptionState.collectAsStateWithLifecycle()
 
     if(state.value.isOpenSheetBottom && state.value.currentProduct != null) {
         ProductBottomSheet(
@@ -131,15 +122,15 @@ fun ProductDetailsScreen(
             },
             state.value.currentProduct!!,
             coroutineScope,
-            mapOptions,
-            selectedOptions,
+            optionState.value.mapOptions,
+            optionState.value.selectedOptions,
             { type, value ->
                 viewModel.updateSelectedOption(type, value)
             },
             currentSubProduct = currentSubProductState.value,
-            mapKeySubProductImages,
-            mapSubProducts,
-            mapKeyToOptionMap,
+            optionState.value.mapKeySubProductImages,
+            optionState.value.mapSubProducts,
+            optionState.value.mapKeyToOptionMap,
             state.value.quantity,
             {
                 viewModel.updateQuantity(it)
