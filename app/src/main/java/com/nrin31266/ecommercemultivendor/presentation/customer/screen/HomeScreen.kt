@@ -22,6 +22,7 @@ import androidx.compose.material3.Scaffold
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -30,6 +31,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.SearchViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.SearchBar
@@ -38,8 +40,9 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.TightIconButton
 @Composable
 fun HomeScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel = hiltViewModel(),
 ) {
+
     val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
 
     Scaffold(

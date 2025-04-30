@@ -2,65 +2,18 @@ package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
 
 import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.FlowRow
-
-
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-
-
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Chat
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.FavoriteBorder
-import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material.icons.filled.ShoppingCart
-import androidx.compose.material.ripple.rememberRipple
-
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SheetState
 import androidx.compose.material3.SheetValue
-import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
-
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -73,38 +26,23 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.max
-import androidx.compose.ui.unit.min
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import coil.compose.AsyncImage
-import com.nrin31266.ecommercemultivendor.R
-import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
-import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
-import com.nrin31266.ecommercemultivendor.presentation.components.DiscountLabel
+import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductBottomSheet
+import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsBottomBar
+import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsContent
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProductDetailsViewModel
-import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProductsViewModel
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
 import com.nrin31266.ecommercemultivendor.presentation.utils.ImagesSlider
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel = hiltViewModel(),
@@ -118,81 +56,18 @@ fun ProductDetailsScreen(
     val state = viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true,        // <<— nếu bạn muốn bỏ qua trạng thái nửa màn hình,
-
+//        confirmValueChange = { it != SheetValue.Hidden }
     )
     var openBottomSheet by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    // Điều khiển hiển thị Bottom Sheet
     fun showBottomSheet() {
         openBottomSheet = true
     }
 
-    // State
-    var currentSubProduct by remember { mutableStateOf<SubProductDto?>(null) }
-    val selectedOptions = remember { mutableStateMapOf<String, String>() }
-    val mapOptions = remember { mutableStateMapOf<String, List<String>>() }
-    val mapKeySubProductImages = remember { mutableStateMapOf<String, String>() }
-    val mapSubProducts = remember { mutableStateMapOf<String, SubProductDto>() }
-    val mapKeyToOptionMap = remember { mutableStateMapOf<String, Map<String, String>>() }
-
-    fun optionKeyString(optionMap: Map<String, String>): String =
-        optionMap.entries.sortedBy { it.key }.joinToString("|") { "${it.key}:${it.value}" }
 
 
-    // Tìm subProduct đúng với selectedOptions
-    fun findMatchingSubProduct(selectedOptions: Map<String, String>): SubProductDto? {
-        return mapSubProducts[optionKeyString(selectedOptions)]
-    }
 
-// Build data khi có product
-    LaunchedEffect(state.value.currentProduct) {
-        currentSubProduct = null
-        selectedOptions.clear()
-        mapOptions.clear()
-        mapKeySubProductImages.clear()
-        mapSubProducts.clear()
-        mapKeyToOptionMap.clear()
-        val product = state.value.currentProduct
-        if (product != null && !product.isSubProduct && product.subProducts != null) {
-            // Tạm thời map để gom các options
-            val tempMap = mutableMapOf<String, MutableSet<String>>()
-
-            // Duyệt qua từng subProduct
-            product.subProducts!!.forEach { subProduct ->
-                val optionMap = mutableMapOf<String, String>()
-
-                subProduct.options?.forEach { option ->
-                    val type = option.optionType?.value ?: return@forEach
-                    val value = option.optionValue ?: return@forEach
-
-                    tempMap.getOrPut(type) { mutableSetOf() }.add(value)
-                    optionMap[type] = value
-
-                    // Nếu có optionKey (ví dụ như Color) thì lưu image cho từng value
-                    if (product.optionKey != null && mapKeySubProductImages[value] == null) {
-                        mapKeySubProductImages[value] = subProduct.images?.firstOrNull() ?: ""
-                    }
-                }
-
-                if (optionMap.isNotEmpty()) {
-                    val optionKey = optionKeyString(optionMap);
-                    mapSubProducts[optionKey] = subProduct
-                    mapKeyToOptionMap[optionKey] = optionMap
-                }
-
-            }
-
-            // Cập nhật mapOptions và reset selectedOptions
-            mapOptions.clear()
-            tempMap.forEach { (type, values) ->
-                mapOptions[type] = values.toList()
-            }
-        }
-    }
-
-    // Stock
-    var quantity by rememberSaveable { mutableIntStateOf(1) }
 
 
 
@@ -251,569 +126,39 @@ fun ProductDetailsScreen(
             )
         }
     }
-    if (openBottomSheet && state.value.currentProduct != null) ProductBottomSheet(
-        sheetState,
-        onDismiss = {
-            openBottomSheet = false
-        },
-        state.value.currentProduct!!,
-        coroutineScope,
-        mapOptions,
-        selectedOptions,
-        { type, value ->
-            if (value == "") selectedOptions.remove(type) else selectedOptions[type] = value
-            currentSubProduct = findMatchingSubProduct(
-                selectedOptions
-            )
-        },
-        currentSubProduct = currentSubProduct,
-        mapKeySubProductImages,
-        mapSubProducts,
-        mapKeyToOptionMap,
-        //
-        quantity,
-        {
-            quantity = it
-        }
-    )
-}
+    val mapOptions = viewModel.mapOptions
+    val selectedOptions = viewModel.selectedOptions
+    val mapSubProducts = viewModel.mapSubProducts
+    val mapKeySubProductImages = viewModel.mapKeySubProductImages
+    val mapKeyToOptionMap = viewModel.mapKeyToOptionMap
+    val currentSubProductState = viewModel.currentSubProduct.collectAsStateWithLifecycle()
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProductBottomSheet(
-    sheetState: SheetState,
-    onDismiss: () -> Unit,
-    product: ProductDto,
-    scope: CoroutineScope,
-    mapOptions: Map<String, List<String>>,
-    selectedOptions: Map<String, String>,
-    onSelectedOptionChange: (String, String) -> Unit,
-    currentSubProduct: SubProductDto?,
-    mapKeySubProductImages: Map<String, String>,
-    mapSubProducts: Map<String, SubProductDto>,
-    mapKeyToOptionMap: Map<String, Map<String, String>>,
-    quantity: Int,
-    onQuantityChange: (Int) -> Unit
-) {
-
-
-    fun isOptionAvailable(type: String, value: String): Boolean {
-        if (selectedOptions[type] == value) return true
-
-        // Tạo bản sao tạm thời với lựa chọn được cập nhật
-        val tempSelection = selectedOptions.toMutableMap().apply {
-            this[type] = value
-        }
-
-        // Duyệt tất cả key trong mapSubProducts
-        return mapSubProducts.entries.any { (keyString, subProduct) ->
-
-            val optionMap = mapKeyToOptionMap[keyString] ?: return@any false
-
-            // Kiểm tra xem optionMap có chứa hết tempSelection không
-            optionMap.all { (k, v) ->
-                tempSelection[k] == v || !tempSelection.containsKey(k)
-            } && (subProduct.quantity ?: 0) > 0 && (subProduct.quantity ?: 0) >= quantity
-        }
-    }
-
-
-    val screenHeight = LocalConfiguration.current.screenHeightDp.dp
-    val maxSheetHeight = screenHeight * 0.7f
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = sheetState,
-        containerColor = Color.White,
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp),
-
-        modifier = Modifier,
-        content = {
-
-            Scaffold(
-                topBar = {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp, horizontal = 8.dp)
-                                .height(110.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-
-
-                            ) {
-                            Column(
-                                modifier = Modifier,
-
-                                ) {
-                                AsyncImage(
-                                    model = if (product.optionKey != null) {
-                                        val selectedValue = selectedOptions[product.optionKey]
-                                        val imageUrl = mapKeySubProductImages[selectedValue]
-                                        imageUrl ?: product.images.firstOrNull()
-                                    } else {
-                                        product.images.firstOrNull()
-                                    },
-
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .height(100.dp)
-                                        .width(100.dp)
-                                        .border(
-                                            1.dp,
-                                            Color.LightGray,
-                                            RoundedCornerShape(8.dp)
-                                        ),
-                                    contentScale = ContentScale.Fit,
-
-                                    )
-
-                            }
-                            Column(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .fillMaxSize()
-                                    .padding(8.dp),
-                                verticalArrangement = Arrangement.Bottom,
-
-
-                                ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-
-                                ) {
-                                    Text("${
-                                        if(product.isSubProduct){
-                                            product.subProducts?.get(0)?.sellingPrice?.let {
-                                                CurrencyConverter.toVND(
-                                                    it
-                                                )
-                                            }
-                                        }else
-                                        if (currentSubProduct == null) CurrencyConverter.toVND(
-                                            product.minSellingPrice
-                                        ) + " - "
-                                                + CurrencyConverter.toVND(product.maxMrpPrice) else currentSubProduct.sellingPrice?.let {
-                                            CurrencyConverter.toVND(
-                                                it
-                                            )
-                                        }
-                                    }",
-                                        maxLines = 1,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Bold,
-                                        color = colorResource(R.color.elegant_gold))
-
-                                    if (currentSubProduct?.mrpPrice != null) {
-                                        Text(
-                                            text = CurrencyConverter.toVND(currentSubProduct.mrpPrice!!),
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = Color.Gray,
-                                            textDecoration = TextDecoration.LineThrough,
-                                        )
-                                    }
-                                }
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Text("Storage: ${if (currentSubProduct == null) product.subProducts?.sumOf { it.quantity ?: 0 } else currentSubProduct.quantity}")
-                                }
-                            }
-                            Column(
-                                modifier = Modifier,
-                            ) {
-                                IconButton({
-                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                        if (!sheetState.isVisible) {
-                                            onDismiss()
-                                        }
-                                    }
-                                }) {
-                                    Icon(imageVector = Icons.Default.Close, "")
-                                }
-                            }
-                        }
-                        androidx.compose.material.Divider()
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                },
-                bottomBar = {
-
-                    Column {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        androidx.compose.material.Divider()
-                        Button(
-                            {},
-                            modifier = Modifier
-                                .padding(8.dp)
-                                .clip(RoundedCornerShape(4.dp))
-                                .fillMaxWidth()
-                                .height(54.dp),
-                            shape = RoundedCornerShape(4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                colorResource(R.color.elegant_gold)
-
-                            ),
-                            enabled =
-                            if (product.isSubProduct) {
-                                quantity > 0 && quantity <= (product.subProducts?.get(0)?.quantity
-                                    ?: 0)
-                            } else {
-                                currentSubProduct != null &&
-                                        quantity > 0 &&
-                                        quantity <= (currentSubProduct.quantity ?: 0)
-                            }
-                        ) {
-                            Text(
-                                "Add to cart",
-                                color = Color.White,
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
-                    }
-                },
-                modifier = Modifier.heightIn(max = maxSheetHeight) // <<=== QUAN TRỌNG
-            ) { innerPadding ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(innerPadding)
-
-                ) {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        mapOptions.forEach { (type, values) ->
-                            item {
-
-                                Text(
-                                    text = type,
-                                    style = MaterialTheme.typography.titleSmall,
-                                    modifier = Modifier.padding(start = 8.dp, bottom = 8.dp)
-                                )
-                                com.google.accompanist.flowlayout.FlowRow(
-                                    mainAxisSpacing = 8.dp,
-                                    crossAxisSpacing = 8.dp,
-                                    modifier = Modifier
-                                        .padding(8.dp)
-                                ) {
-                                    values.forEach { value ->
-                                        val isAvailable = isOptionAvailable(type, value)
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(
-                                                    start = 8.dp,
-                                                    bottom = 8.dp,
-                                                    end = 8.dp
-                                                )
-                                                .border(
-                                                    1.dp,
-                                                    if (selectedOptions[type] == value) colorResource(
-                                                        R.color.teal_700
-                                                    )
-                                                    else Color.Transparent,
-                                                    RoundedCornerShape(2.dp)
-                                                )
-                                                .background(
-                                                    if (isAvailable) Color.LightGray.copy(alpha = 0.3f) else Color.LightGray,
-                                                    RoundedCornerShape(2.dp)
-                                                )
-                                                .clickable(
-                                                    enabled = isAvailable
-                                                ) {
-                                                    onSelectedOptionChange(
-                                                        type,
-                                                        if (selectedOptions[type] == value) "" else value
-                                                    )
-                                                }
-                                                .clip(RoundedCornerShape(2.dp))
-//                                                .widthIn(min = 80.dp, max = 200.dp),
-
-
-                                        ) {
-
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(2.dp)
-                                            ) {
-                                                if (type == product.optionKey) {
-                                                    AsyncImage(
-                                                        model = mapKeySubProductImages[value],
-                                                        contentDescription = null,
-                                                        modifier = Modifier
-                                                            .height(40.dp)
-                                                            .width(40.dp)
-                                                            .padding(start = 4.dp)
-                                                            .clip(
-                                                                RoundedCornerShape(4.dp)
-                                                            )
-                                                            .background(
-                                                                Color.Transparent
-                                                            ),
-
-                                                        )
-                                                }
-                                                Text(
-                                                    value,
-                                                    modifier = Modifier.padding(8.dp),
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = if (!isAvailable) Color.Gray else if (selectedOptions[type] == value) colorResource(
-                                                        R.color.teal_700
-                                                    )
-                                                    else Color.Black,
-                                                    maxLines = 1
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-
-
-
-
-
-                                androidx.compose.material.Divider(
-                                    modifier = Modifier.padding(
-                                        vertical = 8.dp
-                                    )
-                                )
-                            }
-
-                        }
-                        item {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(12.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween // Quantity trái, icon phải
-                            ) {
-                                // Cột bên trái
-                                Column {
-                                    Text(
-                                        "Quantity:",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                }
-
-                                Box {
-                                    // Nội dung chính
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        modifier = Modifier
-                                            .border(1.dp, Color.LightGray, RoundedCornerShape(8.dp))
-                                    ) {
-                                        IconButton(
-                                            onClick = {
-                                                if (quantity > 1) onQuantityChange(quantity - 1)
-                                            },
-                                            enabled = (currentSubProduct != null || product.isSubProduct) &&
-                                                    quantity > 1
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Remove,
-                                                contentDescription = null
-                                            )
-                                        }
-
-                                        Box(
-                                            modifier = Modifier
-                                                .background(Color.LightGray)
-                                                .width(1.dp)
-                                                .height(46.dp)
-                                        )
-
-                                        Text(
-                                            quantity.toString(),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.SemiBold,
-                                            modifier = Modifier.padding(horizontal = 24.dp),
-                                            color = colorResource(R.color.elegant_gold)
-                                        )
-
-                                        Box(
-                                            modifier = Modifier
-                                                .background(Color.LightGray)
-                                                .width(1.dp)
-                                                .height(46.dp)
-                                        )
-
-                                        IconButton(
-                                            onClick = {
-                                                onQuantityChange(quantity + 1)
-                                            }, enabled = if (product.isSubProduct) {
-
-                                                quantity < (product.subProducts?.get(0)?.quantity
-                                                    ?: 0)
-
-                                            } else {
-                                                quantity < (currentSubProduct?.quantity ?: 0)
-
-                                            }
-
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Add,
-                                                contentDescription = null
-                                            )
-                                        }
-                                    }
-
-                                    // Lớp phủ + chặn tương tác
-                                    if (currentSubProduct == null && !product.isSubProduct) {
-                                        Box(
-                                            modifier = Modifier
-                                                .matchParentSize()
-                                                .background(
-                                                    Color.LightGray.copy(0.5f),
-                                                    RoundedCornerShape(8.dp)
-                                                )
-                                                .clip(RoundedCornerShape(8.dp)) // Màu xám mờ
-                                                .pointerInput(Unit) {} // Ngăn người dùng tương tác
-                                        )
-                                    }
-                                }
-                            }
-
-
-                        }
-                    }
-                }
+    if(openBottomSheet && state.value.currentProduct != null) {
+        ProductBottomSheet(
+            sheetState,
+            onDismiss = {
+                openBottomSheet = false
+            },
+            state.value.currentProduct!!,
+            coroutineScope,
+            mapOptions,
+            selectedOptions,
+            { type, value ->
+                viewModel.updateSelectedOption(type, value)
+            },
+            currentSubProduct = currentSubProductState.value,
+            mapKeySubProductImages,
+            mapSubProducts,
+            mapKeyToOptionMap,
+            state.value.quantity,
+            {
+                viewModel.updateQuantity(it)
             }
-
-
-        },
-
         )
-}
-
-@Composable
-fun ProductDetailsBottomBar(product: ProductDto, onAddToCartClick: () -> Unit = {}) {
-    Row(
-        modifier = Modifier
-            .padding(
-                bottom = WindowInsets.navigationBars
-                    .asPaddingValues()
-                    .calculateBottomPadding()
-            )
-            .background(Color.LightGray)
-            .fillMaxWidth()
-            .height(50.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .background(colorResource(R.color.teal_700))
-                .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(imageVector = Icons.Default.Chat, "", tint = Color.White)
-            Text("Chat now", color = Color.White, style = MaterialTheme.typography.bodySmall)
-        }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .background(colorResource(R.color.elegant_gold))
-                .fillMaxSize()
-                .clickable { onAddToCartClick() },
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Icon(imageVector = Icons.Default.ShoppingCart, "", tint = Color.White)
-            Text("Add to cart", color = Color.White, style = MaterialTheme.typography.bodySmall)
-
-        }
     }
 }
 
-@Composable
-fun ProductDetailsContent(
-    product: ProductDto, isFavorite: Boolean = false,
-) {
-    val subProducts = product.subProducts
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp)
-        ) {
-            Text(
-                "${if (!subProducts.isNullOrEmpty()) subProducts.size else 1} variations available",
-                color = Color.Gray, style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-        }
-        Box(
-            modifier = Modifier.padding(horizontal = 8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                modifier = Modifier
-                    .align(Alignment.TopStart)
-                    .fillMaxWidth()
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        CurrencyConverter.toVND(product.minSellingPrice),
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = colorResource(R.color.elegant_gold),
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        CurrencyConverter.toVND(product.maxMrpPrice),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Color.Gray,
-                        textDecoration = TextDecoration.LineThrough
-                    )
-                    DiscountLabel(product.discountPercentage)
-                }
-            }
 
-            Column(
-                modifier = Modifier.align(Alignment.TopEnd)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "Sold: ${product.totalSold}", style = MaterialTheme.typography.bodySmall,
-                        fontWeight = FontWeight.SemiBold
-                    )
-                    if (isFavorite) Icon(
-                        imageVector = Icons.Default.Favorite, "", modifier = Modifier.size(20.dp),
-                        tint = colorResource(R.color.error_red)
-                    ) else
-                        Icon(
-                            imageVector = Icons.Default.FavoriteBorder,
-                            "",
-                            modifier = Modifier.size(20.dp)
-                        )
-                }
 
-            }
-        }
 
-        Row(
-            modifier = Modifier.padding(horizontal = 8.dp)
 
-        ) {
-            Text(
-                product.title,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-    }
-
-}

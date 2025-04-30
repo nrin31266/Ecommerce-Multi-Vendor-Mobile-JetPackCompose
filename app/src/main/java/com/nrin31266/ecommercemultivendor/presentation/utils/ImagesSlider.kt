@@ -94,7 +94,7 @@ fun ImagesSlider(
                         .clip(RoundedCornerShape(8.dp))
                         .border(
                             width = if (pagerState.currentPage == index) 2.dp else 0.dp,
-                            color = if (pagerState.currentPage == index) colorResource(R.color.warning_orange) else Color.Transparent,
+                            color = if (pagerState.currentPage == index) colorResource(R.color.teal_700) else Color.Transparent,
                             shape = RoundedCornerShape(8.dp)
                         )
                         .clickable {
