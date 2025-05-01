@@ -28,13 +28,14 @@ fun CustomTopBar(
     onActionClick: (() -> Unit)? = null,
     extraContent: (@Composable () -> Unit)? = null,
     content : (@Composable () -> Unit)? = null,
-    customAction : (@Composable () -> Unit)? = null
+    customAction : (@Composable () -> Unit)? = null,
+    hasDivider: Boolean = false
 ) {
     Column(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()).padding(bottom = 10.dp)
+            .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
     ) {
         Row(
             modifier = Modifier
@@ -97,6 +98,12 @@ fun CustomTopBar(
 
         if (extraContent != null) {
             extraContent()
+        }
+        if (hasDivider) {
+            Divider(
+                color = Color.LightGray,
+                thickness = 1.dp,
+            )
         }
     }
 }

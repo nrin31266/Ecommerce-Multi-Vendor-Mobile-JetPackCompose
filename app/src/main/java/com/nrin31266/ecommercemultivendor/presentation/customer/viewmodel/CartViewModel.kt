@@ -146,6 +146,7 @@ class CartViewModel @Inject constructor(
         var totalSellingPrice = 0L
         var totalMrpPrice = 0L
         var totalCartItem = 0
+        var totalCartItemAvailable = 0;
 
         cart.groups.forEach { group ->
             totalShop += 1
@@ -153,6 +154,8 @@ class CartViewModel @Inject constructor(
                 val subProduct = item.subProduct ?: return@forEach
                 val rootQuantity = subProduct.quantity ?: return@forEach
                 val quantity = item.quantity ?: return@forEach
+
+                totalCartItem += 1
                 if (quantity > rootQuantity) return@forEach
 
                 val sellingPrice = subProduct.sellingPrice ?: return@forEach
@@ -161,7 +164,7 @@ class CartViewModel @Inject constructor(
                 totalSellingPrice += sellingPrice * quantity
                 totalMrpPrice += mrpPrice * quantity
                 totalItem += quantity
-                totalCartItem += 1
+                totalCartItemAvailable += 1
             }
         }
 
@@ -171,7 +174,8 @@ class CartViewModel @Inject constructor(
             totalSellingPrice = totalSellingPrice,
             totalMrpPrice = totalMrpPrice,
             discountPercentage = ((totalMrpPrice - totalSellingPrice) * 100 / totalMrpPrice).toInt(),
-            totalCartItem = totalCartItem
+            totalCartItem = totalCartItem,
+            totalCartItemAvailable = totalCartItemAvailable
         )
     }
 
@@ -203,4 +207,6 @@ data class CartInfoState(
     val totalMrpPrice:Long=0L,
     val discountPercentage: Int = 0,
     val totalCartItem: Int = 0,
+    val totalCartItemAvailable: Int = 0,
+
 )
