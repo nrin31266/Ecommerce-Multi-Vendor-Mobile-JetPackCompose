@@ -25,7 +25,7 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.SearchBar
 @Composable
 fun HomeScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel,
 ) {
 
     val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()

@@ -36,7 +36,7 @@ import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 @Composable
 fun AccountScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel
 ) {
     val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
     Scaffold(

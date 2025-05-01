@@ -46,7 +46,7 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.TextDivider
 @Composable
 fun LoginScreen(
     navController: NavController,
-    authViewModel: AuthViewModel = hiltViewModel(),
+    authViewModel: AuthViewModel,
     redirect: String?
 ) {
     val state = authViewModel.userAuthState.collectAsStateWithLifecycle()

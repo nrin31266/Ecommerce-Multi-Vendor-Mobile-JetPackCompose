@@ -1,11 +1,14 @@
 package com.nrin31266.ecommercemultivendor.domain.repo
 
 
+import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.toReadableErrorMoshi
+import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
+import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
@@ -17,13 +20,14 @@ import com.nrin31266.ecommercemultivendor.network.ApiService
 import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
 
-class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
+class RepoImpl @Inject constructor(private val apiService: ApiService,private val authPreferences: AuthPreferences) : Repo {
     override fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>> = flow {
         emit(ResultState.Loading)
         emit(makeApiCall { apiService.userSignup(authRequest) })
@@ -101,6 +105,39 @@ class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
         emit(makeApiCall { apiService.getProductDetail(id) })
     }.flowOn(Dispatchers.IO)
 
+    override fun addToCart(
+        productId: Long,
+        subProductId: Long,
+        request: AddUpdateCartItemRequest
+    ): Flow<ResultState<CartItemDto>> = flow {
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.addToCart(productId, subProductId, request, token) })
+
+    }.flowOn(Dispatchers.IO)
+
+    override fun updateCartItem(
+        cartItemId: Long,
+        request: AddUpdateCartItemRequest
+    ): Flow<ResultState<CartItemDto>> = flow {
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.updateCartItem(cartItemId, request, token) })
+
+    }.flowOn(Dispatchers.IO)
+
+    override fun deleteCartItem(cartItemId: Long): Flow<ResultState<ApiResponseNoData>> = flow{
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.deleteCartItem(cartItemId, token) })
+    }.flowOn(Dispatchers.IO)
+
+    private suspend fun getBearerToken(): String {
+        val token = authPreferences.jwtFlow.firstOrNull()
+            ?: throw IllegalStateException("Unauthorized")
+        return "Bearer $token"
+    }
+
 
     private suspend fun <T> makeApiCall(apiCall: suspend () -> T): ResultState<T> {
         return try {
@@ -112,4 +149,7 @@ class RepoImpl @Inject constructor(private val apiService: ApiService) : Repo {
             ResultState.Error("Unknown error: ${e.localizedMessage}")
         }
     }
+
+
+
 }

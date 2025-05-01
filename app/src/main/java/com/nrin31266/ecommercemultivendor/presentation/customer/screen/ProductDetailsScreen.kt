@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,7 +36,9 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ImagesSlider
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
+import com.nrin31266.ecommercemultivendor.presentation.utils.BasicNotification
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
+import kotlinx.coroutines.flow.collectLatest
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,12 +48,30 @@ fun ProductDetailsScreen(
     productId: String,
     authViewModel: AuthViewModel = hiltViewModel()
 ) {
+    val showDialog = remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
         navController.currentBackStackEntry?.destination?.route?.let {
             Log.d("NavController", "Current route: $it")
         }
         Log.d("ProductDetailsScreen", "Product ID: $productId")
         viewModel.getProductDetails(productId.toLong())
+
+        viewModel.eventFlow.collectLatest {
+            when(it){
+                is ProductDetailsViewModel.ProductDetailsEvent.ShowSnackbar -> {
+                    snackbarHostState.showSnackbar(
+                        message = it.message
+                    )
+                }
+                is ProductDetailsViewModel.ProductDetailsEvent.ShowBasicDialog -> {
+                    showDialog.value = true
+                }
+                null->{
+
+                }
+            }
+        }
     }
     val state = viewModel.state.collectAsStateWithLifecycle()
     val sheetState = rememberModalBottomSheetState(
@@ -65,7 +89,8 @@ fun ProductDetailsScreen(
             if (state.value.currentProduct != null) ProductDetailsBottomBar(
                 state.value.currentProduct!!,
                 onAddToCartClick = { viewModel.changeIsSheetBottom() })
-        }
+        },
+
     ) { innerPadding ->
         Box(
             modifier = Modifier.padding(innerPadding)
@@ -117,8 +142,9 @@ fun ProductDetailsScreen(
         }
     }
 
-    val currentSubProductState = viewModel.currentSubProduct.collectAsStateWithLifecycle()
+
     val optionState = viewModel.productOptionState.collectAsStateWithLifecycle()
+    val addProductToCartState = viewModel.addProductToCartState.collectAsStateWithLifecycle()
 
     if(state.value.isOpenSheetBottom && state.value.currentProduct != null) {
         ProductBottomSheet(
@@ -133,7 +159,7 @@ fun ProductDetailsScreen(
             { type, value ->
                 viewModel.updateSelectedOption(type, value)
             },
-            currentSubProduct = currentSubProductState.value,
+            currentSubProduct = state.value.currentSubProductDto,
             optionState.value.mapKeySubProductImages,
             optionState.value.mapSubProducts,
             optionState.value.mapKeyToOptionMap,
@@ -142,8 +168,18 @@ fun ProductDetailsScreen(
                 viewModel.updateQuantity(it)
             },
             authState.value.isLogin,
-            navController
+            navController,
+            addProductToCartState.value.isLoading,
+            addProductToCartState.value.errorMessage,
+            onAddToCartClick = {
+                viewModel.addProductToCart();
+            },
+            snackbarHostState
         )
+    }
+
+    if(showDialog.value){
+        BasicNotification({showDialog.value = false}, addProductToCartState.value.errorMessage?:"")
     }
 }
 

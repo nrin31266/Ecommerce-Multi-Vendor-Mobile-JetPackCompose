@@ -219,6 +219,8 @@ data class UserAuthState(
     val isLogin: Boolean= false,
 )
 
+
+
 sealed class AuthEvent {
     object NavigateToHome : AuthEvent()
     data class ShowSnackbar(val message: String) : AuthEvent()

@@ -1,9 +1,11 @@
 package com.nrin31266.ecommercemultivendor.domain.repo
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
+import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
@@ -35,4 +37,8 @@ interface Repo {
     ): Flow<ResultState<PageableDto<ProductDto>>>
 
     fun getProductDetail(id: Long): Flow<ResultState<ProductDto>>
+    fun addToCart(productId: Long, subProductId: Long, request: AddUpdateCartItemRequest): Flow<ResultState<CartItemDto>>
+    fun updateCartItem(cartItemId: Long, request: AddUpdateCartItemRequest): Flow<ResultState<CartItemDto>>
+    fun deleteCartItem(cartItemId: Long): Flow<ResultState<ApiResponseNoData>>
+
 }

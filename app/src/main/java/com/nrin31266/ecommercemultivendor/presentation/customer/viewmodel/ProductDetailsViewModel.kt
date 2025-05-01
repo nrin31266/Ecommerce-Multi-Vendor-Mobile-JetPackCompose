@@ -6,26 +6,60 @@ import androidx.lifecycle.viewModelScope
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
+import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
+import com.nrin31266.ecommercemultivendor.domain.usecase.cart.AddProductToCartUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.products.GetProductDetailsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
-    val getProductDetailsUseCase: GetProductDetailsUseCase
+    val getProductDetailsUseCase: GetProductDetailsUseCase,
+    val addProductToCartUseCase: AddProductToCartUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProductDetailsState())
     val state: StateFlow<ProductDetailsState> = _state
 
-    private val _currentSubProduct = MutableStateFlow<SubProductDto?>(null)
-    val currentSubProduct: StateFlow<SubProductDto?> = _currentSubProduct
+
 
     private val _productOptionState = MutableStateFlow(ProductOptionState())
     val productOptionState: StateFlow<ProductOptionState> = _productOptionState
+    private val _addProductToCartState = MutableStateFlow(ProductDetailsAddItemToCartState())
+    val addProductToCartState: StateFlow<ProductDetailsAddItemToCartState> = _addProductToCartState
+
+    private val _eventFlow = MutableSharedFlow<ProductDetailsEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
+
+    fun addProductToCart(){
+        viewModelScope.launch {
+            addProductToCartUseCase(state.value.currentProduct?.id!!, state.value.currentSubProductDto?.id!!, AddUpdateCartItemRequest(state.value.quantity)).collect{
+                when(it){
+                    is ResultState.Loading -> {
+                        _addProductToCartState.value = _addProductToCartState.value.copy(isLoading = true, errorMessage = null)
+                    }
+                    is ResultState.Success -> {
+                        _addProductToCartState.value = _addProductToCartState.value.copy(
+                            isLoading = false,
+                        )
+                        _eventFlow.emit(ProductDetailsEvent.ShowSnackbar("Added to cart successfully"))
+
+                    }
+                    is ResultState.Error -> {
+                        _addProductToCartState.value = _addProductToCartState.value.copy(errorMessage = it.message, isLoading = false)
+                        _eventFlow.emit(ProductDetailsEvent.ShowBasicDialog(it.message))
+                    }
+                }
+            }
+
+        }
+    }
+
 
     fun getProductDetails(id: Long) {
         viewModelScope.launch {
@@ -42,7 +76,6 @@ class ProductDetailsViewModel @Inject constructor(
                         _state.value = _state.value.copy(
                             currentProduct = product,
                             isLoading = false,
-
                         )
                     }
 
@@ -65,7 +98,7 @@ class ProductDetailsViewModel @Inject constructor(
                 selectedOptions = _productOptionState.value.selectedOptions + (type to value)
             )
         }
-        _currentSubProduct.value = findMatchingSubProduct(_productOptionState.value.selectedOptions)
+        _state.value = _state.value.copy(currentSubProductDto = findMatchingSubProduct(_productOptionState.value.selectedOptions))
     }
 
     fun updateQuantity(quantity: Int) {
@@ -78,7 +111,7 @@ class ProductDetailsViewModel @Inject constructor(
 
     private fun clearOptionStates() {
         _productOptionState.value = ProductOptionState()
-        _currentSubProduct.value = null
+        _state.value = _state.value.copy(currentSubProductDto = null)
     }
 
     private fun buildOptionsFromProduct(product: ProductDto?) {
@@ -121,6 +154,8 @@ class ProductDetailsViewModel @Inject constructor(
                 mapKeyToOptionMap = newMapKeyToOptionMap,
                 mapKeySubProductImages = newMapKeySubProductImages
             )
+        }else if(product != null && product.isSubProduct ){
+            _state.value = _state.value.copy(currentSubProductDto = product.subProducts?.get(0))
         }
     }
 
@@ -132,6 +167,11 @@ class ProductDetailsViewModel @Inject constructor(
         return _productOptionState.value.mapSubProducts[optionKeyString(selectedOptions)]
     }
 
+    sealed class ProductDetailsEvent {
+        data class ShowSnackbar(val message: String) : ProductDetailsEvent()
+        data class ShowBasicDialog(val message: String) : ProductDetailsEvent()
+    }
+
 }
 
 data class ProductDetailsState(
@@ -141,6 +181,7 @@ data class ProductDetailsState(
     var favCurrentProduct: Boolean = true,
     var quantity: Int = 1,
     var isOpenSheetBottom: Boolean = false,
+    var currentSubProductDto: SubProductDto?= null
 )
 
 data class ProductOptionState(
@@ -150,3 +191,9 @@ data class ProductOptionState(
     val mapKeySubProductImages: Map<String, String> = emptyMap(),
     val mapKeyToOptionMap: Map<String, Map<String, String>> = emptyMap()
 )
+
+data class ProductDetailsAddItemToCartState(
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null,
+)
+

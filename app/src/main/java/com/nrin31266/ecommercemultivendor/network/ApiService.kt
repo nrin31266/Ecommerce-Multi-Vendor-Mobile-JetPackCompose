@@ -15,6 +15,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import kotlinx.coroutines.flow.Flow
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
@@ -71,8 +72,21 @@ interface ApiService {
     suspend fun addToCart(
         @Path("productId") productId: Long,
         @Path("subProductId") subProductId: Long,
-        @Body request: AddUpdateCartItemRequest
+        @Body request: AddUpdateCartItemRequest,
+        @Header("Authorization") jwt: String
     ): CartItemDto
 
+    @PUT("api/cart/update/item/{cartItemId}")
+    suspend fun updateCartItem(
+        @Path("cartItemId") cartItemId: Long,
+        @Body request: AddUpdateCartItemRequest,
+        @Header("Authorization") jwt: String
+    ): CartItemDto
+
+    @DELETE("/item/{cartItemId}")
+    suspend fun deleteCartItem(
+        @Path("cartItemId") cartItemId: Long,
+        @Header("Authorization") jwt: String
+    ): ApiResponseNoData
 
 }

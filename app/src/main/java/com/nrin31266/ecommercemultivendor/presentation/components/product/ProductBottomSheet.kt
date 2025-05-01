@@ -6,7 +6,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,6 +32,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SheetState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -54,6 +55,8 @@ import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
+import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
+import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -74,7 +77,11 @@ fun ProductBottomSheet(
     quantity: Int,
     onQuantityChange: (Int) -> Unit,
     isLogin: Boolean,
-    navController: NavController
+    navController: NavController,
+    loading: Boolean,
+    errorMessage: String?,
+    onAddToCartClick: () -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
 
 
@@ -112,6 +119,10 @@ fun ProductBottomSheet(
         content = {
 
             Scaffold(
+                snackbarHost = { SnackbarHost(snackbarHostState,
+                    snackbar = {
+                        CustomMessageBox(message = it.visuals.message, MessageType.SUCCESS)
+                    }) },
                 modifier = Modifier.heightIn(max = maxSheetHeight), // <<=== QUAN TRỌNG
                 topBar = {
                     Column(
@@ -261,19 +272,23 @@ fun ProductBottomSheet(
                                     )
                                 } else {
                                     // Xu li them vao gio
+                                    onAddToCartClick()
                                 }
                             },
                             modifier = Modifier
                                 .padding(8.dp)
                                 .clip(RoundedCornerShape(4.dp))
                                 .fillMaxWidth()
-                                .height(54.dp),
+                                .height(44.dp),
                             shape = RoundedCornerShape(4.dp),
                             colors = ButtonDefaults.buttonColors(
                                 colorResource(R.color.elegant_gold)
 
                             ),
                             enabled =
+                            if(loading){
+                               false
+                            }else
                             if (product.isSubProduct) {
                                 quantity > 0 && quantity <= (product.subProducts?.get(0)?.quantity
                                     ?: 0)

@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -53,17 +54,16 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductDe
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 
 @Composable
-fun App(
-//    authViewModel: AuthViewModel = hiltViewModel(),
-////    sellerViewModel: SellerViewModel = hiltViewModel(),
-////    userViewModel: UserViewModel = hiltViewModel(),
+fun App() {
+    val authViewModel: AuthViewModel = hiltViewModel()
 
-) {
+
+
     val context = LocalContext.current
     val navController = rememberNavController()
-
     // Create AuthPreferences manually if not using Hilt inject
     val authPreferences = remember { AuthPreferences(context) }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -113,15 +113,6 @@ fun App(
 
             ),
 
-//        topBar = {
-//            // Thêm TopAppBar trực tiếp không qua Scaffold
-//            CustomTopBar(
-//                title = "Nguyen Van",
-//                actionIcon = Icons.Default.ArrowBack,
-//
-//
-//                )
-//        },
         contentWindowInsets = WindowInsets(0)
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
@@ -134,10 +125,10 @@ fun App(
                 ) {
 
                     composable(CustomerRoutes.CustomerHomeScreen.route) {
-                        HomeScreen(navController)
+                        HomeScreen(navController, authViewModel)
                     }
                     composable(CustomerRoutes.CustomerAccountScreen.route) {
-                        AccountScreen(navController)
+                        AccountScreen(navController, authViewModel)
                     }
                     composable(CustomerRoutes.CustomerOrdersScreen.route) {
                         OrdersScreen(navController)
@@ -197,7 +188,8 @@ fun App(
 
                     LoginScreen(
                         navController = navController,
-                        redirect = redirect
+                        redirect = redirect,
+                        authViewModel = authViewModel
                     )
                 }
 
