@@ -30,35 +30,7 @@ class ProductDetailsViewModel @Inject constructor(
 
     private val _productOptionState = MutableStateFlow(ProductOptionState())
     val productOptionState: StateFlow<ProductOptionState> = _productOptionState
-    private val _addProductToCartState = MutableStateFlow(ProductDetailsAddItemToCartState())
-    val addProductToCartState: StateFlow<ProductDetailsAddItemToCartState> = _addProductToCartState
 
-    private val _eventFlow = MutableSharedFlow<ProductDetailsEvent>()
-    val eventFlow = _eventFlow.asSharedFlow()
-
-    fun addProductToCart(){
-        viewModelScope.launch {
-            addProductToCartUseCase(state.value.currentProduct?.id!!, state.value.currentSubProductDto?.id!!, AddUpdateCartItemRequest(state.value.quantity)).collect{
-                when(it){
-                    is ResultState.Loading -> {
-                        _addProductToCartState.value = _addProductToCartState.value.copy(isLoading = true, errorMessage = null)
-                    }
-                    is ResultState.Success -> {
-                        _addProductToCartState.value = _addProductToCartState.value.copy(
-                            isLoading = false,
-                        )
-                        _eventFlow.emit(ProductDetailsEvent.ShowSnackbar("Added to cart successfully"))
-
-                    }
-                    is ResultState.Error -> {
-                        _addProductToCartState.value = _addProductToCartState.value.copy(errorMessage = it.message, isLoading = false)
-                        _eventFlow.emit(ProductDetailsEvent.ShowBasicDialog(it.message))
-                    }
-                }
-            }
-
-        }
-    }
 
 
     fun getProductDetails(id: Long) {
@@ -192,8 +164,4 @@ data class ProductOptionState(
     val mapKeyToOptionMap: Map<String, Map<String, String>> = emptyMap()
 )
 
-data class ProductDetailsAddItemToCartState(
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null,
-)
 

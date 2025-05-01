@@ -30,6 +30,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -47,6 +48,7 @@ import com.example.bottombar.model.VisibleItem
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AccountScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CartScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.HomeScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.LoginScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScreen
@@ -55,11 +57,14 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsS
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProfileViewModel
 
 @Composable
 fun App() {
     val authViewModel: AuthViewModel = hiltViewModel()
-
+    val cartViewModel: CartViewModel = hiltViewModel()
+    val profileViewModel: ProfileViewModel = hiltViewModel()
 
 
     val context = LocalContext.current
@@ -83,11 +88,10 @@ fun App() {
 
 
 
-    var startScreen by remember { mutableStateOf(SubNavigation.MainCustomerScreen.route) }
+    val startScreen by remember { mutableStateOf(SubNavigation.MainCustomerScreen.route) }
 
     LaunchedEffect(jwtState) {
         if (jwtState != null) {
-
             Log.d("App", "Logged in with JWT: $jwtState");
 
         }else{
@@ -96,6 +100,31 @@ fun App() {
     }
     val customerBottomItems = BottomNavItemsProvider.getCustomerBottomItems();
 
+    val isLoggedIn = authViewModel.userAuthState.collectAsStateWithLifecycle().value.isLogin
+    LaunchedEffect(isLoggedIn){
+        if(isLoggedIn){
+            // Reset profile
+            Log.d("App", "Load user profile");
+            profileViewModel.getUserProfile()
+            // Reset cart
+            Log.d("App", "Load user cart");
+            cartViewModel.getUserCart()
+
+        }else{
+            Log.d("App", "Remove user cart");
+            Log.d("App", "Remove user profile");
+        }
+    }
+
+//    var lastJwt by remember { mutableStateOf<String?>(null) }
+//
+//    LaunchedEffect(authViewModel.userAuthState.value.jwt) {
+//        val currentJwt = authViewModel.userAuthState.value.jwt
+//        if (!currentJwt.isNullOrBlank() && currentJwt != lastJwt) {
+//            lastJwt = currentJwt
+//            cartViewModel.loadCart()
+//        }
+//    }
 
 
 
@@ -125,7 +154,7 @@ fun App() {
                 ) {
 
                     composable(CustomerRoutes.CustomerHomeScreen.route) {
-                        HomeScreen(navController, authViewModel)
+                        HomeScreen(navController, authViewModel, cartViewModel)
                     }
                     composable(CustomerRoutes.CustomerAccountScreen.route) {
                         AccountScreen(navController, authViewModel)
@@ -164,7 +193,7 @@ fun App() {
                         )
                     ) { backStackEntry ->
                         val productId = backStackEntry.arguments?.getString("productId")
-                        ProductDetailsScreen(productId = productId!!, navController = navController)
+                        ProductDetailsScreen(productId = productId!!, navController = navController, authViewModel = authViewModel, cartViewModel = cartViewModel)
                     }
 
 
@@ -191,6 +220,11 @@ fun App() {
                         redirect = redirect,
                         authViewModel = authViewModel
                     )
+                }
+                composable(
+                    route = CustomerRoutes.CartScreen.route
+                ){
+                    CartScreen(navController, cartViewModel)
                 }
 
 

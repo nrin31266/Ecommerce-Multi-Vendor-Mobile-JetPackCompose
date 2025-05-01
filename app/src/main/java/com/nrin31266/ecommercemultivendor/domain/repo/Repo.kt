@@ -1,6 +1,7 @@
 package com.nrin31266.ecommercemultivendor.domain.repo
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
@@ -20,7 +21,7 @@ interface Repo {
     fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
     fun userLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
 //    fun sellerLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
-    fun getUserProfile(jwt: String): Flow<ResultState<UserDto>>
+    fun getUserProfile(): Flow<ResultState<UserDto>>
 //    fun getSellerProfile(jwt: String): Flow<ResultState<SellerDto>>
     fun sendEmailOtp(authRequest: AuthRequest): Flow<ResultState<ApiResponseNoData>>
 
@@ -40,5 +41,5 @@ interface Repo {
     fun addToCart(productId: Long, subProductId: Long, request: AddUpdateCartItemRequest): Flow<ResultState<CartItemDto>>
     fun updateCartItem(cartItemId: Long, request: AddUpdateCartItemRequest): Flow<ResultState<CartItemDto>>
     fun deleteCartItem(cartItemId: Long): Flow<ResultState<ApiResponseNoData>>
-
+    fun getUserCart(): Flow<ResultState<CartDto>>
 }

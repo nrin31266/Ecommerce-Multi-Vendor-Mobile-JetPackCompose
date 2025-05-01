@@ -9,9 +9,11 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -26,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductBottomSheet
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsBottomBar
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsContent
@@ -36,7 +39,10 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ImagesSlider
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
+import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.BasicNotification
+import com.nrin31266.ecommercemultivendor.presentation.utils.IconButtonWithBadge
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 import kotlinx.coroutines.flow.collectLatest
 
@@ -46,7 +52,8 @@ fun ProductDetailsScreen(
     viewModel: ProductDetailsViewModel = hiltViewModel(),
     navController: NavController,
     productId: String,
-    authViewModel: AuthViewModel = hiltViewModel()
+    authViewModel: AuthViewModel,
+    cartViewModel: CartViewModel
 ) {
     val showDialog = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -57,7 +64,7 @@ fun ProductDetailsScreen(
         Log.d("ProductDetailsScreen", "Product ID: $productId")
         viewModel.getProductDetails(productId.toLong())
 
-        viewModel.eventFlow.collectLatest {
+        cartViewModel.addProductToCartEventFlow.collectLatest {
             when(it){
                 is ProductDetailsViewModel.ProductDetailsEvent.ShowSnackbar -> {
                     snackbarHostState.showSnackbar(
@@ -79,7 +86,7 @@ fun ProductDetailsScreen(
 //        confirmValueChange = { it != SheetValue.Hidden }
     )
     val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
-
+    val cartInfoState = cartViewModel.cartInfoState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
 
 
@@ -137,14 +144,22 @@ fun ProductDetailsScreen(
                 },
                 modifier = Modifier
                     .align(Alignment.TopCenter)
-                    .background(Color.Transparent)
+                    .background(Color.Transparent),
+                customAction = {
+                    IconButtonWithBadge(
+                        onClick = {navController.navigate(CustomerRoutes.CartScreen.route)},
+                        icon = Icons.Default.ShoppingCart,
+                        badgeCount = cartInfoState.value.totalItem,
+                        contentDescription = "Cart"
+                    )
+                }
             )
         }
     }
 
 
     val optionState = viewModel.productOptionState.collectAsStateWithLifecycle()
-    val addProductToCartState = viewModel.addProductToCartState.collectAsStateWithLifecycle()
+    val addProductToCartState = cartViewModel.addProductToCartState.collectAsStateWithLifecycle()
 
     if(state.value.isOpenSheetBottom && state.value.currentProduct != null) {
         ProductBottomSheet(
@@ -172,7 +187,9 @@ fun ProductDetailsScreen(
             addProductToCartState.value.isLoading,
             addProductToCartState.value.errorMessage,
             onAddToCartClick = {
-                viewModel.addProductToCart();
+                cartViewModel.addProductToCart(state.value.currentProduct?.id!!,
+                    state.value.currentSubProductDto?.id!!,
+                    AddUpdateCartItemRequest(state.value.quantity))
             },
             snackbarHostState
         )

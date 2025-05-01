@@ -1,6 +1,7 @@
 package com.nrin31266.ecommercemultivendor.network
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
@@ -88,5 +89,11 @@ interface ApiService {
         @Path("cartItemId") cartItemId: Long,
         @Header("Authorization") jwt: String
     ): ApiResponseNoData
+
+    @GET("api/cart")
+    suspend fun getCart(
+        @Header("Authorization") jwt: String
+    ): CartDto
+
 
 }

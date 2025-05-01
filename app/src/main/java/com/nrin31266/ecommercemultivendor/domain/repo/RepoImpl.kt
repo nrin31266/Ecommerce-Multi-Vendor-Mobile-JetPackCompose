@@ -4,6 +4,7 @@ package com.nrin31266.ecommercemultivendor.domain.repo
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.toReadableErrorMoshi
+import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
@@ -45,40 +46,15 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         }
     }.flowOn(Dispatchers.IO)
 
-//    override fun sellerLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>> = flow {
-//        emit(ResultState.Loading)
-//        try {
-//            val response = apiService.sellerLogin(authRequest)
-//            emit(ResultState.Success(response))
-//        } catch (e: Exception) {
-//            emit(ResultState.Error(e.message ?: "Unknown error"))
-//        }
-//
-//
-//    }.flowOn(Dispatchers.IO)
 
-    override fun getUserProfile(jwt: String): Flow<ResultState<UserDto>> = flow {
+
+    override fun getUserProfile(): Flow<ResultState<UserDto>> = flow {
         emit(ResultState.Loading)
-        try {
-            val response = apiService.getUserProfile(jwt)
-            emit(ResultState.Success(response))
-        } catch (e: HttpException) {
-            emit(ResultState.Error(e.toReadableErrorMoshi()))
-        }  catch (e: Exception) {
-            emit(ResultState.Error("Unknown error: ${e.localizedMessage}"))
-        }
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.getUserProfile(token) })
     }.flowOn(Dispatchers.IO)
 
-//    override fun getSellerProfile(jwt: String): Flow<ResultState<SellerDto>> = flow{
-//
-//        emit(ResultState.Loading)
-//        try {
-//            val response = apiService.getSellerProfile(jwt)
-//            emit(ResultState.Success(response))
-//        } catch (e: Exception) {
-//            emit(ResultState.Error(e.message ?: "Unknown error"))
-//        }
-//    }.flowOn(Dispatchers.IO)
+
 
     override fun sendEmailOtp(authRequest: AuthRequest): Flow<ResultState<ApiResponseNoData>> = flow {
         emit(ResultState.Loading)
@@ -130,6 +106,12 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         emit(ResultState.Loading)
         val token = getBearerToken()
         emit(makeApiCall { apiService.deleteCartItem(cartItemId, token) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun getUserCart(): Flow<ResultState<CartDto>> = flow {
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.getCart(token) })
     }.flowOn(Dispatchers.IO)
 
     private suspend fun getBearerToken(): String {

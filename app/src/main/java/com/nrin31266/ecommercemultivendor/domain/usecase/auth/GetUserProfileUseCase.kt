@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
 class GetUserProfileUseCase @Inject constructor(private val repo: Repo) {
-    operator fun invoke(jwt: String): Flow<ResultState<UserDto>> {
-        return repo.getUserProfile(jwt)
+    operator fun invoke(): Flow<ResultState<UserDto>> {
+        return repo.getUserProfile()
     }
 }

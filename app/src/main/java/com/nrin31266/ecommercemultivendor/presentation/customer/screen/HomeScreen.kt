@@ -17,8 +17,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
+import com.nrin31266.ecommercemultivendor.presentation.utils.IconButtonWithBadge
 import com.nrin31266.ecommercemultivendor.presentation.utils.SearchBar
 
 
@@ -26,10 +28,11 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.SearchBar
 fun HomeScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
+    cartViewModel: CartViewModel
 ) {
 
     val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
-
+    val cartInfoState = cartViewModel.cartInfoState.collectAsStateWithLifecycle()
     Scaffold(
         topBar = {
            CustomTopBar(content = {
@@ -41,9 +44,15 @@ fun HomeScreen(
                        }
                    }, modifier = Modifier.weight(1f))
                }
-           },
-               actionIcon = Icons.Default.ShoppingCart,
-               onActionClick = {}
+           }, customAction = {
+               IconButtonWithBadge(
+                   onClick = {navController.navigate(CustomerRoutes.CartScreen.route)},
+                   icon = Icons.Default.ShoppingCart,
+                   badgeCount = cartInfoState.value.totalItem,
+                   contentDescription = "Cart"
+               )
+           }
+
            )
         },
         contentWindowInsets = WindowInsets(0),

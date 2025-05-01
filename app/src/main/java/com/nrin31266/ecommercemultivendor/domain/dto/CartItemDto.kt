@@ -22,8 +22,8 @@ package com.nrin31266.ecommercemultivendor.domain.dto
 data class CartItemDto(
     val id : Long? = null,
     val cartId : Long? = null,
-    val productId : Long? = null,
-    val subProductId : Long? = null,
+    val subProduct: SubProductDto? = null,
+    val product: ProductDto? = null,
     val quantity : Int? = null,
     val userId : Long? = null
 )

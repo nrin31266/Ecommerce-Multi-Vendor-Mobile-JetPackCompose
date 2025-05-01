@@ -27,7 +27,8 @@ fun CustomTopBar(
     actionIcon: ImageVector? = null,
     onActionClick: (() -> Unit)? = null,
     extraContent: (@Composable () -> Unit)? = null,
-    content : (@Composable () -> Unit)? = null
+    content : (@Composable () -> Unit)? = null,
+    customAction : (@Composable () -> Unit)? = null
 ) {
     Column(
         modifier = modifier
@@ -76,7 +77,9 @@ fun CustomTopBar(
                 }
             }
 
-
+            if(customAction!=null){
+                customAction()
+            }else
             if (actionIcon != null && onActionClick != null) {
                 IconButton(
                     onClick = onActionClick,
