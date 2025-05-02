@@ -8,7 +8,9 @@ import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ShopCartGroupResponse
 import com.nrin31266.ecommercemultivendor.domain.usecase.cart.AddProductToCartUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.cart.DeleteCartItemUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.cart.GetUserCartUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.cart.UpdateCartItemUseCase
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProductDetailsViewModel.ProductDetailsEvent
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -22,6 +24,8 @@ import javax.inject.Inject
 class CartViewModel @Inject constructor(
     private val addProductToCartUseCase: AddProductToCartUseCase,
     private val getUserCartUseCase: GetUserCartUseCase,
+    private val updateCartItemUseCase: UpdateCartItemUseCase,
+    private val deleteCartItemUseCase: DeleteCartItemUseCase
 ) : ViewModel() {
     private val _addProductToCartState = MutableStateFlow(ProductDetailsAddItemToCartState())
     val addProductToCartState: StateFlow<ProductDetailsAddItemToCartState> = _addProductToCartState
@@ -34,6 +38,76 @@ class CartViewModel @Inject constructor(
 
     private val _cartInfoState = MutableStateFlow(CartInfoState())
     val cartInfoState: StateFlow<CartInfoState> = _cartInfoState
+
+    private val _cartItemState = MutableStateFlow(CartItemState())
+    val cartItemState: StateFlow<CartItemState> = _cartItemState
+
+    fun updateCartItem(cartItemId: Long, request: AddUpdateCartItemRequest) {
+        viewModelScope.launch {
+            updateCartItemUseCase(cartItemId, request).collect {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _cartItemState.value = _cartItemState.value.copy(
+                            mapEnable = _cartItemState.value.mapEnable + (cartItemId.toString() to false)
+                        )
+                    }
+
+                    is ResultState.Success -> {
+
+                        _cartItemState.value = _cartItemState.value.copy(
+                            mapEnable = _cartItemState.value.mapEnable - (cartItemId.toString()),
+                            mapError = _cartItemState.value.mapError - (cartItemId.toString())
+                        )
+                        afterAddUpdateRemoveCartItem(it.data)
+
+                    }
+
+                    is ResultState.Error -> {
+                        _cartItemState.value = _cartItemState.value.copy(
+                            mapEnable = _cartItemState.value.mapEnable - (cartItemId.toString()),
+                            mapError = _cartItemState.value.mapError + (cartItemId.toString() to it.message)
+                        )
+                    }
+                }
+
+            }
+        }
+    }
+
+    fun deleteCartItem(cartItemId: Long, cartItem: CartItemDto) {
+        viewModelScope.launch {
+
+            deleteCartItemUseCase(cartItemId).collect {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _cartItemState.value = _cartItemState.value.copy(
+                            mapEnable = _cartItemState.value.mapEnable + (cartItemId.toString() to false),
+                            mapCartItem = _cartItemState.value.mapCartItem + (cartItemId.toString() to cartItem)
+                        )
+                    }
+                    is ResultState.Success -> {
+                        afterAddUpdateRemoveCartItem(cartItem, true)
+                        _cartItemState.value = _cartItemState.value.copy(
+                            mapEnable = _cartItemState.value.mapEnable - (cartItemId.toString()),
+                            mapError = _cartItemState.value.mapError - (cartItemId.toString()),
+                            mapCartItem = _cartItemState.value.mapCartItem - (cartItemId.toString()),
+
+                        )
+
+                    }
+                    is ResultState.Error -> {
+                        _cartItemState.value = _cartItemState.value.copy(
+                            mapEnable = _cartItemState.value.mapEnable - (cartItemId.toString()),
+                            mapError = _cartItemState.value.mapError + (cartItemId.toString() to it.message),
+                            mapCartItem = _cartItemState.value.mapCartItem - (cartItemId.toString()),
+
+                        )
+                    }
+                }
+            }
+        }
+
+    }
 
 
     fun getUserCart() {
@@ -101,29 +175,40 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    private fun afterAddUpdateRemoveCartItem(cartItem : CartItemDto, isRemove : Boolean=false){
-        val seller = cartItem.product?.seller?:return
+    fun changeShowDialog(value: Boolean, cartItem: CartItemDto? = null){
+        _state.value = _state.value.copy(
+            showDialog = value,
+            currentCartItem = cartItem
+        )
+    }
+
+    private fun afterAddUpdateRemoveCartItem(cartItem: CartItemDto, isRemove: Boolean = false) {
+        val seller = cartItem.product?.seller ?: return
 
         val cart = _state.value.cart ?: return
         val groups = cart.groups.toMutableList()
         val groupIndex = groups.indexOfFirst { it.seller.id == seller.id }
-        if(groupIndex == -1){
-            if(!isRemove){
+        if (groupIndex == -1) {
+            if (!isRemove) {
                 groups.add(
                     ShopCartGroupResponse(
                         seller,
-                        setOf(cartItem)
+                        listOf(cartItem)
                     )
                 )
             }
-        }else{
+        } else {
             val group = groups[groupIndex]
-            val items = group.cartItems.toMutableSet()
+            val items = group.cartItems.toMutableList()
             if (isRemove) {
                 items.removeIf { it.id == cartItem.id }
             } else {
-                items.removeIf { it.id == cartItem.id }
-                items.add(cartItem)
+                val index = items.indexOfFirst { it.id == cartItem.id }
+                if (index != -1) {
+                    items[index] = cartItem // update tại chỗ
+                } else {
+                    items.add(cartItem) // mới thì thêm vào cuối
+                }
             }
             if (items.isEmpty()) {
                 groups.removeAt(groupIndex)
@@ -138,6 +223,7 @@ class CartViewModel @Inject constructor(
         calculateCartInfo()
     }
 
+
     private fun calculateCartInfo() {
         val cart = _state.value.cart ?: return
 
@@ -148,18 +234,23 @@ class CartViewModel @Inject constructor(
         var totalCartItem = 0
         var totalCartItemAvailable = 0;
 
+
         cart.groups.forEach { group ->
             totalShop += 1
             group.cartItems.forEach { item ->
-                val subProduct = item.subProduct ?: return@forEach
-                val rootQuantity = subProduct.quantity ?: return@forEach
-                val quantity = item.quantity ?: return@forEach
+//                mapLoading[item.id.toString()] = false
+//                mapError[item.id.toString()] = ""
+
+                val subProduct = item.subProduct!!
+                val rootQuantity = subProduct.quantity!!
+                val quantity = item.quantity!!
 
                 totalCartItem += 1
                 if (quantity > rootQuantity) return@forEach
 
                 val sellingPrice = subProduct.sellingPrice ?: return@forEach
                 val mrpPrice = subProduct.mrpPrice ?: return@forEach
+
 
                 totalSellingPrice += sellingPrice * quantity
                 totalMrpPrice += mrpPrice * quantity
@@ -173,10 +264,16 @@ class CartViewModel @Inject constructor(
             totalItem = totalItem,
             totalSellingPrice = totalSellingPrice,
             totalMrpPrice = totalMrpPrice,
-            discountPercentage = ((totalMrpPrice - totalSellingPrice) * 100 / totalMrpPrice).toInt(),
+            discountPercentage = if (totalMrpPrice == 0L) 0 else ((totalMrpPrice - totalSellingPrice) * 100 / totalMrpPrice).toInt(),
             totalCartItem = totalCartItem,
             totalCartItemAvailable = totalCartItemAvailable
         )
+//        _cartItemState.value = CartItemState(
+//            mapLoading = mapLoading,
+//            mapError = mapError
+//        )
+
+
     }
 
 
@@ -197,16 +294,24 @@ data class ProductDetailsAddItemToCartState(
 data class CartState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val cart: CartDto? = null
+    val cart: CartDto? = null,
+    val currentCartItem: CartItemDto? = null,
+    val showDialog: Boolean = false,
 )
 
 data class CartInfoState(
     val totalShop: Int = 0,
     val totalItem: Int = 0,
-    val totalSellingPrice:Long = 0L,
-    val totalMrpPrice:Long=0L,
+    val totalSellingPrice: Long = 0L,
+    val totalMrpPrice: Long = 0L,
     val discountPercentage: Int = 0,
     val totalCartItem: Int = 0,
     val totalCartItemAvailable: Int = 0,
 
+    )
+
+data class CartItemState(
+    val mapEnable: Map<String, Boolean> = emptyMap(),
+    val mapError: Map<String, String> = emptyMap(),
+    val mapCartItem: Map<String, CartItemDto> = emptyMap(),
 )

@@ -7,5 +7,5 @@ import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 //Set<CartItem> cartItems;
 data class ShopCartGroupResponse(
     val seller: SellerDto,
-    val cartItems: Set<CartItemDto>
+    val cartItems: List<CartItemDto>
 )

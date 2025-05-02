@@ -84,7 +84,7 @@ interface ApiService {
         @Header("Authorization") jwt: String
     ): CartItemDto
 
-    @DELETE("/item/{cartItemId}")
+    @DELETE("api/cart/item/{cartItemId}")
     suspend fun deleteCartItem(
         @Path("cartItemId") cartItemId: Long,
         @Header("Authorization") jwt: String

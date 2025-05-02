@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,11 +35,13 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ShopCartGroupResponse
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 
 @Composable
 fun GroupCartBySeller(
     navController: NavController,
-    group: ShopCartGroupResponse
+    group: ShopCartGroupResponse,
+    cartViewModel: CartViewModel
 ) {
     Card (
         modifier = Modifier.fillMaxWidth()
@@ -82,8 +85,10 @@ fun GroupCartBySeller(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
 
-                group.cartItems.map {
-                    CartItem(navController, it)
+                group.cartItems.forEach { item ->
+                    key (item.id) {
+                        CartItem(navController, item, cartViewModel)
+                    }
                 }
             }
         }
