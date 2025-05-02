@@ -17,6 +17,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -41,6 +42,9 @@ class CartViewModel @Inject constructor(
 
     private val _cartItemState = MutableStateFlow(CartItemState())
     val cartItemState: StateFlow<CartItemState> = _cartItemState
+
+//    private val _selectedItems = MutableStateFlow<Set<String>>(emptySet())
+//    val selectedItems = _selectedItems.asStateFlow()
 
     fun updateCartItem(cartItemId: Long, request: AddUpdateCartItemRequest) {
         viewModelScope.launch {
@@ -85,6 +89,7 @@ class CartViewModel @Inject constructor(
                             mapCartItem = _cartItemState.value.mapCartItem + (cartItemId.toString() to cartItem)
                         )
                     }
+
                     is ResultState.Success -> {
                         afterAddUpdateRemoveCartItem(cartItem, true)
                         _cartItemState.value = _cartItemState.value.copy(
@@ -92,16 +97,17 @@ class CartViewModel @Inject constructor(
                             mapError = _cartItemState.value.mapError - (cartItemId.toString()),
                             mapCartItem = _cartItemState.value.mapCartItem - (cartItemId.toString()),
 
-                        )
+                            )
 
                     }
+
                     is ResultState.Error -> {
                         _cartItemState.value = _cartItemState.value.copy(
                             mapEnable = _cartItemState.value.mapEnable - (cartItemId.toString()),
                             mapError = _cartItemState.value.mapError + (cartItemId.toString() to it.message),
                             mapCartItem = _cartItemState.value.mapCartItem - (cartItemId.toString()),
 
-                        )
+                            )
                     }
                 }
             }
@@ -175,7 +181,7 @@ class CartViewModel @Inject constructor(
         }
     }
 
-    fun changeShowDialog(value: Boolean, cartItem: CartItemDto? = null){
+    fun changeShowDialog(value: Boolean, cartItem: CartItemDto? = null) {
         _state.value = _state.value.copy(
             showDialog = value,
             currentCartItem = cartItem
@@ -307,8 +313,7 @@ data class CartInfoState(
     val discountPercentage: Int = 0,
     val totalCartItem: Int = 0,
     val totalCartItemAvailable: Int = 0,
-
-    )
+)
 
 data class CartItemState(
     val mapEnable: Map<String, Boolean> = emptyMap(),

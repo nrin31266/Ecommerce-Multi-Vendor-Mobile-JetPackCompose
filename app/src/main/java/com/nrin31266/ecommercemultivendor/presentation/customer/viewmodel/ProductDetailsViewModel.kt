@@ -32,7 +32,6 @@ class ProductDetailsViewModel @Inject constructor(
     val productOptionState: StateFlow<ProductOptionState> = _productOptionState
 
 
-
     fun getProductDetails(id: Long) {
         viewModelScope.launch {
             getProductDetailsUseCase(id).collect {

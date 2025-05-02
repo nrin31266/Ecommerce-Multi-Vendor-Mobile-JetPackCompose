@@ -49,6 +49,7 @@ import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AccountScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CartScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CheckoutScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.HomeScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.LoginScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScreen
@@ -225,6 +226,11 @@ fun App() {
                     route = CustomerRoutes.CartScreen.route
                 ){
                     CartScreen(navController, cartViewModel)
+                }
+                composable(
+                    route = CustomerRoutes.CheckoutScreen.route
+                ){
+                    CheckoutScreen(navController, cartViewModel)
                 }
 
 

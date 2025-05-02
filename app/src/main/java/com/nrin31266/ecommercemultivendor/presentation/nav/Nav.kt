@@ -37,6 +37,8 @@ sealed class CustomerRoutes(val route: String){
     }
 
     data object CartScreen : CustomerRoutes("cart_screen")
+    data object CheckoutScreen : CustomerRoutes("checkout_screen")
+
 
 }
 
