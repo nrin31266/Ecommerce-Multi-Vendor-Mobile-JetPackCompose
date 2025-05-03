@@ -9,4 +9,5 @@ data class UserDto(
     val fullName: String,
     val mobile: String,
     val role: USER_ROLE,
+    val pickupAddress: AddressDto?=null
 )

@@ -22,5 +22,6 @@ data class AddressDto(
     var ward : String? = null,
     var district : String? = null,
     var province : String? = null,
-    var postalCode : String? = null
+    var postalCode : String? = null,
+    var isDefault : Boolean?= null
 )

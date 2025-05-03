@@ -38,6 +38,12 @@ sealed class CustomerRoutes(val route: String){
 
     data object CartScreen : CustomerRoutes("cart_screen")
     data object CheckoutScreen : CustomerRoutes("checkout_screen")
+    data object AddressScreen : CustomerRoutes("address_screen")
+    data object AddEditAddressScreen : CustomerRoutes("add_edit_address_screen/{addressId}"){
+        fun withPath(addressId: Long? = -1): String {
+            return "add_edit_address_screen/$addressId"
+        }
+    }
 
 
 }

@@ -1,6 +1,7 @@
 package com.nrin31266.ecommercemultivendor.domain.repo
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
@@ -42,4 +43,10 @@ interface Repo {
     fun updateCartItem(cartItemId: Long, request: AddUpdateCartItemRequest): Flow<ResultState<CartItemDto>>
     fun deleteCartItem(cartItemId: Long): Flow<ResultState<ApiResponseNoData>>
     fun getUserCart(): Flow<ResultState<CartDto>>
+    fun getAllUserAddresses(): Flow<ResultState<List<AddressDto>>>
+    fun addUserAddress(addressDto: AddressDto): Flow<ResultState<AddressDto>>
+    fun getDefaultUserAddress(): Flow<ResultState<AddressDto>>
+    fun updateUserAddress(addressId: Long, addressDto: AddressDto): Flow<ResultState<AddressDto>>
+    fun deleteUserAddress(addressId: Long): Flow<ResultState<ApiResponseNoData>>
+
 }

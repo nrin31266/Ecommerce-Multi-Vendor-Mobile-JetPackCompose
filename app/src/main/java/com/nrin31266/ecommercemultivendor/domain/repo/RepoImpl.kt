@@ -4,6 +4,7 @@ package com.nrin31266.ecommercemultivendor.domain.repo
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.toReadableErrorMoshi
+import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
@@ -46,15 +47,11 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         }
     }.flowOn(Dispatchers.IO)
 
-
-
     override fun getUserProfile(): Flow<ResultState<UserDto>> = flow {
         emit(ResultState.Loading)
         val token = getBearerToken()
         emit(makeApiCall { apiService.getUserProfile(token) })
     }.flowOn(Dispatchers.IO)
-
-
 
     override fun sendEmailOtp(authRequest: AuthRequest): Flow<ResultState<ApiResponseNoData>> = flow {
         emit(ResultState.Loading)
@@ -114,12 +111,44 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         emit(makeApiCall { apiService.getCart(token) })
     }.flowOn(Dispatchers.IO)
 
+    override fun getAllUserAddresses(): Flow<ResultState<List<AddressDto>>> = flow {
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.getAllUserAddresses(token) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun addUserAddress(addressDto: AddressDto): Flow<ResultState<AddressDto>> = flow {
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.addUserAddress(token, addressDto) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun getDefaultUserAddress(): Flow<ResultState<AddressDto>>  = flow{
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.getDefaultUserAddress(token) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun updateUserAddress(
+        addressId: Long,
+        addressDto: AddressDto
+    ): Flow<ResultState<AddressDto>>  = flow{
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.updateUserAddress(token, addressId, addressDto) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun deleteUserAddress(addressId: Long): Flow<ResultState<ApiResponseNoData>>  = flow {
+        emit(ResultState.Loading)
+        val token = getBearerToken()
+        emit(makeApiCall { apiService.deleteUserAddress(token, addressId) })
+    }.flowOn(Dispatchers.IO)
+
     private suspend fun getBearerToken(): String {
         val token = authPreferences.jwtFlow.firstOrNull()
             ?: throw IllegalStateException("Unauthorized")
         return "Bearer $token"
     }
-
 
     private suspend fun <T> makeApiCall(apiCall: suspend () -> T): ResultState<T> {
         return try {

@@ -20,7 +20,7 @@ fun CustomTextField (
     value: String,
     onValueChange: (String) -> Unit,
     label: String,
-    modifier: Modifier,
+    modifier: Modifier= Modifier,
     singleLine: Boolean = true,
     leadingIcon: ImageVector? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,

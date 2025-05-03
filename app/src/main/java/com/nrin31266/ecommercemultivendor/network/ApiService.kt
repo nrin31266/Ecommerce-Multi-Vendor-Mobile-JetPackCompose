@@ -1,6 +1,7 @@
 package com.nrin31266.ecommercemultivendor.network
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
@@ -95,5 +96,32 @@ interface ApiService {
         @Header("Authorization") jwt: String
     ): CartDto
 
+    @GET("api/users/address")
+    suspend fun getAllUserAddresses(
+        @Header("Authorization") jwt: String
+    ) : List<AddressDto>
 
+    @POST("api/users/address")
+    suspend fun addUserAddress(
+        @Header("Authorization") jwt: String,
+        @Body addressDto: AddressDto
+    ) : AddressDto
+
+    @GET("api/users/address/default")
+    suspend fun getDefaultUserAddress(
+        @Header("Authorization") jwt: String
+    ) : AddressDto
+
+    @PUT("api/users/address/{addressId}")
+    suspend fun updateUserAddress(
+        @Header("Authorization") jwt: String,
+        @Path("addressId") addressId: Long,
+        @Body addressDto: AddressDto
+    ) : AddressDto
+
+    @DELETE("api/users/address/{addressId}")
+    suspend fun deleteUserAddress(
+        @Header("Authorization") jwt: String,
+        @Path("addressId") addressId: Long
+    ): ApiResponseNoData
 }

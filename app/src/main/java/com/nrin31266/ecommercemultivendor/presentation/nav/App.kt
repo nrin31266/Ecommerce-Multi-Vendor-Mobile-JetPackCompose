@@ -22,7 +22,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -48,6 +47,8 @@ import com.example.bottombar.model.VisibleItem
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AccountScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AddEditAddressScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AddressScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CartScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CheckoutScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.HomeScreen
@@ -230,7 +231,25 @@ fun App() {
                 composable(
                     route = CustomerRoutes.CheckoutScreen.route
                 ){
-                    CheckoutScreen(navController, cartViewModel)
+                    CheckoutScreen(navController, it, cartViewModel)
+                }
+                composable(
+                    route = CustomerRoutes.AddressScreen.route
+                ){
+                    AddressScreen(navController, it)
+                }
+                composable(
+                    route = CustomerRoutes.AddEditAddressScreen.route,
+                    arguments = listOf(
+                        navArgument("addressId") {
+                            type = NavType.LongType
+                            nullable = false
+                            defaultValue = -1
+                        }
+                    )
+                ){
+                    val addressId = it.arguments?.getLong("addressId")?:-1
+                    AddEditAddressScreen(navController, addressId, it)
                 }
 
 
