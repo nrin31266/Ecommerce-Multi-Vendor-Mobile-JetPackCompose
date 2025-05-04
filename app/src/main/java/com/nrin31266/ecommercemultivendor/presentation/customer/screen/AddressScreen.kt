@@ -2,7 +2,7 @@ package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
 
 
-import androidx.compose.foundation.border
+import android.util.Log
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -12,9 +12,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Icon
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Info
@@ -23,14 +22,11 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
+import com.nrin31266.ecommercemultivendor.presentation.components.address.AddressCardItem
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.ButtonType
@@ -43,13 +39,14 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 @Composable
 fun AddressScreen(
     navController: NavController,
-    navBackStackEntry: NavBackStackEntry,
-    sharedAddressViewModel: SharedAddressViewModel = hiltViewModel(navBackStackEntry)
+    sharedAddressViewModel: SharedAddressViewModel
 ) {
     val state = sharedAddressViewModel.addressState.collectAsStateWithLifecycle()
+    val sharedAddressState = sharedAddressViewModel.sharedAddressState.collectAsStateWithLifecycle()
 
     LaunchedEffect(Unit) {
         sharedAddressViewModel.getAllUserAddresses()
+        Log.d("AddressScreen", sharedAddressState.value.selectedAddress.toString())
     }
 
     Scaffold (
@@ -102,10 +99,26 @@ fun AddressScreen(
                         }
 
 
-                        items(addresses){
+                        itemsIndexed(addresses){  i, it ->
+                            AddressCardItem(
+                                address = it,
+                                onEditClick = {}, isSelected = sharedAddressState.value.selectedAddress?.id == it.id,
+                                onClick = {
+                                    sharedAddressViewModel.selectAddress(address = it)
+                                    navController.popBackStack()
+                                },
+                                modifier = Modifier.padding(bottom = 8.dp),
+                                notLast = i!=addresses.size-1,
+
+
+                            )
+
 
                         }
                         item {
+                            if(addresses.isNotEmpty()){
+                                Divider(modifier = Modifier.padding(bottom = 8.dp))
+                            }
                             CustomButton (
                                 type = ButtonType.OUTLINED,
                                 onClick = {
@@ -121,7 +134,6 @@ fun AddressScreen(
                         }
                     }
                 }
-
             }
         }
     }

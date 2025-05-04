@@ -122,7 +122,8 @@ class CartViewModel @Inject constructor(
                 when (it) {
                     is ResultState.Loading -> {
                         _state.value = _state.value.copy(
-                            isLoading = true
+                            isLoading = true,
+                            errorMessage = null
                         )
 
                     }

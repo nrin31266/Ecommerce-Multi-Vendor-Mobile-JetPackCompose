@@ -55,8 +55,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun AddEditAddressScreen(
     navController: NavController,
     addressId: Long?= -1L,
-    navBackStackEntry: NavBackStackEntry,
-    sharedAddressViewModel: SharedAddressViewModel = hiltViewModel(navBackStackEntry)
+    sharedAddressViewModel: SharedAddressViewModel = hiltViewModel()
 ) {
     val state = sharedAddressViewModel.addressActionState.collectAsStateWithLifecycle()
 

@@ -61,13 +61,14 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScr
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProfileViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
 
 @Composable
 fun App() {
     val authViewModel: AuthViewModel = hiltViewModel()
     val cartViewModel: CartViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
-
+    val sharedAddressViewModel: SharedAddressViewModel = hiltViewModel()
 
     val context = LocalContext.current
     val navController = rememberNavController()
@@ -198,59 +199,60 @@ fun App() {
                         ProductDetailsScreen(productId = productId!!, navController = navController, authViewModel = authViewModel, cartViewModel = cartViewModel)
                     }
 
+                    composable(CustomerRoutes.CustomerSignupScreen.route) {
+                        SignupScreen(navController)
+                    }
+                    composable(
+                        route = CustomerRoutes.CustomerLoginScreen.route,
+                        arguments = listOf(
+                            navArgument("redirect") {
+                                type = NavType.StringType
+                                nullable = true
+                                defaultValue = null
+                            }
+                        )
+                    ) { backStackEntry ->
+                        val redirect = backStackEntry.arguments?.getString("redirect")
+
+                        LoginScreen(
+                            navController = navController,
+                            redirect = redirect,
+                            authViewModel = authViewModel
+                        )
+                    }
+                    composable(
+                        route = CustomerRoutes.CartScreen.route
+                    ){
+                        CartScreen(navController, cartViewModel)
+                    }
+                    composable(
+                        route = CustomerRoutes.CheckoutScreen.route
+                    ){
+                        CheckoutScreen(navController, cartViewModel, sharedAddressViewModel=sharedAddressViewModel)
+                    }
+                    composable(
+                        route = CustomerRoutes.AddressScreen.route
+                    ){
+
+                        AddressScreen(navController, sharedAddressViewModel=sharedAddressViewModel)
+                    }
+                    composable(
+                        route = CustomerRoutes.AddEditAddressScreen.route,
+                        arguments = listOf(
+                            navArgument("addressId") {
+                                type = NavType.LongType
+                                nullable = false
+                                defaultValue = -1
+                            }
+                        )
+                    ){
+                        val addressId = it.arguments?.getLong("addressId")?:-1
+                        AddEditAddressScreen(navController, addressId)
+                    }
+
+                }
 
 
-                }
-
-                composable(CustomerRoutes.CustomerSignupScreen.route) {
-                    SignupScreen(navController)
-                }
-                composable(
-                    route = CustomerRoutes.CustomerLoginScreen.route,
-                    arguments = listOf(
-                        navArgument("redirect") {
-                            type = NavType.StringType
-                            nullable = true
-                            defaultValue = null
-                        }
-                    )
-                ) { backStackEntry ->
-                    val redirect = backStackEntry.arguments?.getString("redirect")
-
-                    LoginScreen(
-                        navController = navController,
-                        redirect = redirect,
-                        authViewModel = authViewModel
-                    )
-                }
-                composable(
-                    route = CustomerRoutes.CartScreen.route
-                ){
-                    CartScreen(navController, cartViewModel)
-                }
-                composable(
-                    route = CustomerRoutes.CheckoutScreen.route
-                ){
-                    CheckoutScreen(navController, it, cartViewModel)
-                }
-                composable(
-                    route = CustomerRoutes.AddressScreen.route
-                ){
-                    AddressScreen(navController, it)
-                }
-                composable(
-                    route = CustomerRoutes.AddEditAddressScreen.route,
-                    arguments = listOf(
-                        navArgument("addressId") {
-                            type = NavType.LongType
-                            nullable = false
-                            defaultValue = -1
-                        }
-                    )
-                ){
-                    val addressId = it.arguments?.getLong("addressId")?:-1
-                    AddEditAddressScreen(navController, addressId, it)
-                }
 
 
             }

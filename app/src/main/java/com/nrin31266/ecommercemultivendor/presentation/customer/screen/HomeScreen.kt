@@ -19,8 +19,10 @@ import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
+import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.IconButtonWithBadge
+import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 import com.nrin31266.ecommercemultivendor.presentation.utils.SearchBar
 
 
@@ -65,7 +67,10 @@ fun HomeScreen(
 
         ) {
 
-            Text(authState.value.jwt?:"Not logged in")
+            CustomMessageBox(
+                message = authState.value.jwt?:"Not logged in",
+                MessageType.ERROR
+            )
         }
     }
 

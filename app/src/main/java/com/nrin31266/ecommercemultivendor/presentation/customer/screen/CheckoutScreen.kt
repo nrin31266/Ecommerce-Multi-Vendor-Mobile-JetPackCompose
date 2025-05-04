@@ -31,6 +31,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -48,6 +49,7 @@ import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.presentation.components.DiscountLabel
+import com.nrin31266.ecommercemultivendor.presentation.components.address.AddressCardItem
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CheckoutViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
@@ -61,16 +63,22 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 @Composable
 fun CheckoutScreen(
     navController: NavController,
-    navBackStackEntry: NavBackStackEntry,
+
     cartViewModel: CartViewModel,
     checkoutViewModel: CheckoutViewModel = hiltViewModel(),
-    sharedAddressViewModel: SharedAddressViewModel = hiltViewModel(navBackStackEntry)
+    sharedAddressViewModel: SharedAddressViewModel
 ) {
 
 
     val cartInfoState = cartViewModel.cartInfoState.collectAsStateWithLifecycle()
     val checkoutState = checkoutViewModel.checkoutState.collectAsStateWithLifecycle()
     val sharedAddressState = sharedAddressViewModel.sharedAddressState.collectAsStateWithLifecycle()
+
+    LaunchedEffect (Unit){
+        if(sharedAddressState.value.selectedAddress == null){
+            sharedAddressViewModel.getDefaultUserAddress()
+         }
+    }
 
     Scaffold(
         topBar = {
@@ -212,7 +220,10 @@ fun CheckoutScreen(
                                                     Text("Select address")
                                                 }
                                             }else{
-
+                                                AddressCardItem(
+                                                    address = sharedAddressState.value.selectedAddress!!,
+                                                    isOnlyView = true
+                                                )
                                             }
                                         }
                                         Column(

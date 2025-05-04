@@ -106,6 +106,7 @@ fun ProductItem(
                 district = "District 1",
                 province = "Province 1",
 
+
             ),
             bankDetails = BankDetailsDto(
                 accountNumber = "123456789",
