@@ -48,7 +48,7 @@ object NetworkModule {
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://115d-2001-ee0-4c63-cdb0-e483-5658-3ebf-a8b4.ngrok-free.app/")
+            .baseUrl("https://94df-2401-d800-421-5abf-7876-b031-2a0b-54.ngrok-free.app/")
             .client(okHttpClient)
             .addConverterFactory(MoshiConverterFactory.create(moshi)) // Dùng MoshiConverterFactory
             .build()

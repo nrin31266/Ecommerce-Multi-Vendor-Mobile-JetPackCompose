@@ -1,19 +1,23 @@
 package com.nrin31266.ecommercemultivendor.network
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
+import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
+import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateOrderRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
+import com.nrin31266.ecommercemultivendor.domain.dto.response.PaymentResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import kotlinx.coroutines.flow.Flow
 import retrofit2.http.Body
@@ -124,4 +128,22 @@ interface ApiService {
         @Header("Authorization") jwt: String,
         @Path("addressId") addressId: Long
     ): ApiResponseNoData
+
+    @POST("api/orders")
+    suspend fun createOrder(
+        @Header("Authorization") jwt: String,
+        @Body request: CreateOrderRequest
+    ): PaymentResponse
+
+    @GET("api/orders/user")
+    suspend fun getUserOrders(
+        @Header("Authorization") jwt: String,
+        @Query("status") status: SELLER_ORDER_STATUS,
+    ): List<SellerOrderDto>
+
+    @GET("api/orders/user/{sellerOrderId}")
+    suspend fun getUserOrderDetails(
+        @Header("Authorization") jwt: String,
+        @Path("sellerOrderId") sellerOrderId: Long,
+    ): SellerOrderDto
 }

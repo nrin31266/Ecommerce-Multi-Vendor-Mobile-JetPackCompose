@@ -284,10 +284,8 @@ class CartViewModel @Inject constructor(
     }
 
 
-    private fun clearCart() {
-        _state.value = _state.value.copy(
-            cart = null
-        )
+    fun clearCart() {
+        _state.value = CartState()
         _cartInfoState.value = CartInfoState()
     }
 

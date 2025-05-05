@@ -3,20 +3,24 @@ package com.nrin31266.ecommercemultivendor.domain.repo
 
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.common.toReadableErrorMoshi
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
+import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
+import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateOrderRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
+import com.nrin31266.ecommercemultivendor.domain.dto.response.PaymentResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import com.nrin31266.ecommercemultivendor.network.ApiService
 import com.squareup.moshi.JsonDataException
@@ -142,6 +146,21 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         emit(ResultState.Loading)
         val token = getBearerToken()
         emit(makeApiCall { apiService.deleteUserAddress(token, addressId) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun createOrder(request: CreateOrderRequest): Flow<ResultState<PaymentResponse>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.createOrder(getBearerToken(), request) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun getUserOrders(status: SELLER_ORDER_STATUS): Flow<ResultState<List<SellerOrderDto>>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getUserOrders(getBearerToken(), status) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun getUserOrderDetails(sellerOrderId: Long): Flow<ResultState<SellerOrderDto>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getUserOrderDetails(getBearerToken(), sellerOrderId) })
     }.flowOn(Dispatchers.IO)
 
     private suspend fun getBearerToken(): String {

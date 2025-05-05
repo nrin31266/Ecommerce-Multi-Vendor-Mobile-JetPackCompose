@@ -63,15 +63,18 @@ import com.nrin31266.ecommercemultivendor.presentation.components.checkout.Payme
 import com.nrin31266.ecommercemultivendor.presentation.components.checkout.PaymentMethodItem
 import com.nrin31266.ecommercemultivendor.presentation.components.checkout.ShopCheckoutItem
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CheckoutEvent
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CheckoutViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
+import com.nrin31266.ecommercemultivendor.presentation.utils.BasicNotification
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomButton
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 import com.vanrin05.app.domain.PAYMENT_METHOD
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun CheckoutScreen(
@@ -87,11 +90,31 @@ fun CheckoutScreen(
     val cartState = cartViewModel.state.collectAsStateWithLifecycle()
     val checkoutState = checkoutViewModel.checkoutState.collectAsStateWithLifecycle()
     val sharedAddressState = sharedAddressViewModel.sharedAddressState.collectAsStateWithLifecycle()
-    val selectedPaymentMethod = remember { mutableStateOf(PAYMENT_METHOD.CASH_ON_DELIVERY) }
+    val createOrderState = checkoutViewModel.createOrderState.collectAsStateWithLifecycle()
+    val selectedPaymentMethod = createOrderState.value.paymentMethod
     val totalShippingCosts = (cartState.value.cart?.groups?.size!! * 30000).toLong()
+    val showDialog = remember { mutableStateOf(false) }
+
     LaunchedEffect(Unit) {
         if (sharedAddressState.value.selectedAddress == null) {
             sharedAddressViewModel.getDefaultUserAddress()
+        }
+
+        checkoutViewModel.checkoutEvent.collectLatest {
+            when(it){
+                is CheckoutEvent.PaymentSuccess -> {
+                    cartViewModel.clearCart()
+
+                    navController.navigate(CustomerRoutes.CustomerHomeScreen.route) {
+                        popUpTo(0) { inclusive = false }
+                        launchSingleTop = true
+                    }
+                }
+                is CheckoutEvent.PaymentFailed -> {
+                    showDialog.value = true
+                }
+                else -> {}
+            }
         }
     }
 
@@ -167,9 +190,13 @@ fun CheckoutScreen(
                         CustomButton(
                             text = "Payment",
                             onClick = {
-
+                                checkoutViewModel.createOrder(
+                                    sharedAddressState.value.selectedAddress?.id!!
+                                )
                             },
-                            enabled = cartInfoState.value.totalCartItemAvailable == cartInfoState.value.totalCartItem
+                            enabled = sharedAddressState.value.selectedAddress != null
+                                    && !createOrderState.value.isLoading,
+                            loading = createOrderState.value.isLoading
                         )
                     }
                 }
@@ -448,9 +475,9 @@ fun CheckoutScreen(
                                     paymentMethods.forEach {
                                         PaymentMethodItem(
                                             it,
-                                            selectedPaymentMethod.value == it.method,
+                                            selectedPaymentMethod == it.method,
                                             {
-                                                selectedPaymentMethod.value = it.method
+                                                checkoutViewModel.selectPaymentMethod(it.method)
                                             })
                                     }
                                 }
@@ -552,6 +579,9 @@ fun CheckoutScreen(
                 }
             }
         }
+    }
+    if(showDialog.value){
+        BasicNotification({showDialog.value = false}, createOrderState.value.errorMessage?:"")
     }
 }
 
