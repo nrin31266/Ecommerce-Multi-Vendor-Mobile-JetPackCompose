@@ -94,6 +94,10 @@ dependencies {
     implementation("com.squareup.moshi:moshi:1.12.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.12.0")
 
+    // GSON
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+
+
     // Lottie
     implementation("com.airbnb.android:lottie-compose:6.6.6")
 

@@ -60,7 +60,7 @@ data class SellerOrderDto(
     val cancelReason: String,
     val status: SELLER_ORDER_STATUS,
     val paymentDetails: PaymentDetailsDto,
-    val createdDate: LocalDateTime,
-    val updatedDate: LocalDateTime?=null,
+    val createdDate: String,
+    val updatedDate: String?=null,
     val seller: SellerDto,
 )

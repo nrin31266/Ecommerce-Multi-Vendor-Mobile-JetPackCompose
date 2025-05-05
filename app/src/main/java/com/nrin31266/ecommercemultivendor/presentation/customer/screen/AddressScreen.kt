@@ -27,7 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.presentation.components.address.AddressCardItem
-import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.SharedAddressViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.ButtonType
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomButton

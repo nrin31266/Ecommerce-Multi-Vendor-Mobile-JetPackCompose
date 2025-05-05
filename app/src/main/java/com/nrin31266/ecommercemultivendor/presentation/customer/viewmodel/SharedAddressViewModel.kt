@@ -1,4 +1,4 @@
-package com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share
+package com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

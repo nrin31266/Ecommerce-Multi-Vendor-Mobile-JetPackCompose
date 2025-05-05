@@ -58,10 +58,11 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductDe
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.purchased_screen.PurchasedScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProfileViewModel
-import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.SharedAddressViewModel
 
 @Composable
 fun App() {
@@ -81,14 +82,12 @@ fun App() {
 
     LaunchedEffect(currentRoute) {
         isShowBottomBar.value = when (currentRoute) {
-            CustomerRoutes.CustomerHomeScreen.route, CustomerRoutes.CustomerAccountScreen.route
-                , CustomerRoutes.CustomerOrdersScreen.route-> true
+            CustomerRoutes.CustomerHomeScreen.route, CustomerRoutes.CustomerAccountScreen.route, CustomerRoutes.CustomerOrdersScreen.route -> true
             else -> false
         }
     }
 
     val jwtState by authPreferences.jwtFlow.collectAsState(initial = null)
-
 
 
     val startScreen by remember { mutableStateOf(SubNavigation.MainCustomerScreen.route) }
@@ -97,15 +96,15 @@ fun App() {
         if (jwtState != null) {
             Log.d("App", "Logged in with JWT: $jwtState");
 
-        }else{
+        } else {
             Log.d("App", "Not logged in");
         }
     }
     val customerBottomItems = BottomNavItemsProvider.getCustomerBottomItems();
 
     val isLoggedIn = authViewModel.userAuthState.collectAsStateWithLifecycle().value.isLogin
-    LaunchedEffect(isLoggedIn){
-        if(isLoggedIn){
+    LaunchedEffect(isLoggedIn) {
+        if (isLoggedIn) {
             // Reset profile
             Log.d("App", "Load user profile");
             profileViewModel.getUserProfile()
@@ -113,7 +112,7 @@ fun App() {
             Log.d("App", "Load user cart");
             cartViewModel.getUserCart()
 
-        }else{
+        } else {
             Log.d("App", "Remove user cart");
             Log.d("App", "Remove user profile");
         }
@@ -130,13 +129,9 @@ fun App() {
 //    }
 
 
-
-
-
-
     Scaffold(
         bottomBar = {
-            if(isShowBottomBar.value){
+            if (isShowBottomBar.value) {
                 CustomAnimatedBottomBar(navController, currentRoute, customerBottomItems)
             }
         },
@@ -165,7 +160,7 @@ fun App() {
                     composable(CustomerRoutes.CustomerOrdersScreen.route) {
                         OrdersScreen(navController)
                     }
-                    composable(CustomerRoutes.SearchScreen.route){
+                    composable(CustomerRoutes.SearchScreen.route) {
                         SearchScreen(navController)
                     }
                     composable(
@@ -196,7 +191,12 @@ fun App() {
                         )
                     ) { backStackEntry ->
                         val productId = backStackEntry.arguments?.getString("productId")
-                        ProductDetailsScreen(productId = productId!!, navController = navController, authViewModel = authViewModel, cartViewModel = cartViewModel)
+                        ProductDetailsScreen(
+                            productId = productId!!,
+                            navController = navController,
+                            authViewModel = authViewModel,
+                            cartViewModel = cartViewModel
+                        )
                     }
 
                     composable(CustomerRoutes.CustomerSignupScreen.route) {
@@ -222,19 +222,26 @@ fun App() {
                     }
                     composable(
                         route = CustomerRoutes.CartScreen.route
-                    ){
+                    ) {
                         CartScreen(navController, cartViewModel)
                     }
                     composable(
                         route = CustomerRoutes.CheckoutScreen.route
-                    ){
-                        CheckoutScreen(navController, cartViewModel, sharedAddressViewModel=sharedAddressViewModel)
+                    ) {
+                        CheckoutScreen(
+                            navController,
+                            cartViewModel,
+                            sharedAddressViewModel = sharedAddressViewModel
+                        )
                     }
                     composable(
                         route = CustomerRoutes.AddressScreen.route
-                    ){
+                    ) {
 
-                        AddressScreen(navController, sharedAddressViewModel=sharedAddressViewModel)
+                        AddressScreen(
+                            navController,
+                            sharedAddressViewModel = sharedAddressViewModel
+                        )
                     }
                     composable(
                         route = CustomerRoutes.AddEditAddressScreen.route,
@@ -245,14 +252,24 @@ fun App() {
                                 defaultValue = -1
                             }
                         )
-                    ){
-                        val addressId = it.arguments?.getLong("addressId")?:-1
+                    ) {
+                        val addressId = it.arguments?.getLong("addressId") ?: -1
                         AddEditAddressScreen(navController, addressId)
+                    }
+                    composable(
+                        route = CustomerRoutes.PurchasedScreen.route,
+                        arguments = listOf(
+                            navArgument("tabIndex") {
+                                type = NavType.IntType
+                                defaultValue = 0
+                            }
+                        )
+                    ) {
+                        val tabIndex = it.arguments?.getInt("tabIndex") ?: 0
+                        PurchasedScreen(navController, tabIndex)
                     }
 
                 }
-
-
 
 
             }
@@ -282,16 +299,16 @@ fun CustomAnimatedBottomBar(
         indicatorColor = colorResource(id = R.color.elegant_gold),
         indicatorDirection = IndicatorDirection.BOTTOM,
         indicatorStyle = IndicatorStyle.WORM,
-       modifier = Modifier.padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
+        modifier = Modifier.padding(
+            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        ),
 
 //        bottomBarHeight = 55.dp,
 
         indicatorHeight = 3.dp,
 
 
-
-
-    ) {
+        ) {
         bottomNavItems.forEach { item ->
             BottomBarItem(
                 selected = item.route == currentRoute,
@@ -315,17 +332,32 @@ fun CustomAnimatedBottomBar(
                 visibleItem = VisibleItem.ICON
 
 
-
             )
         }
     }
 }
+
 object BottomNavItemsProvider {
 
     fun getCustomerBottomItems() = listOf(
-        BottomNavItem("Home", Icons.Filled.Home, Icons.Outlined.Home, CustomerRoutes.CustomerHomeScreen.route),
-        BottomNavItem("Orders", Icons.Filled.List, Icons.Outlined.List, CustomerRoutes.CustomerOrdersScreen.route),
-        BottomNavItem("Account", Icons.Filled.Person, Icons.Outlined.Person, CustomerRoutes.CustomerAccountScreen.route)
+        BottomNavItem(
+            "Home",
+            Icons.Filled.Home,
+            Icons.Outlined.Home,
+            CustomerRoutes.CustomerHomeScreen.route
+        ),
+        BottomNavItem(
+            "Orders",
+            Icons.Filled.List,
+            Icons.Outlined.List,
+            CustomerRoutes.CustomerOrdersScreen.route
+        ),
+        BottomNavItem(
+            "Account",
+            Icons.Filled.Person,
+            Icons.Outlined.Person,
+            CustomerRoutes.CustomerAccountScreen.route
+        )
 
     )
 

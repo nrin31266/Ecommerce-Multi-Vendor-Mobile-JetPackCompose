@@ -17,8 +17,6 @@ import androidx.compose.material.icons.filled.AddCircleOutline
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationCity
-import androidx.compose.material.icons.filled.LocationOn
-import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -34,14 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
-import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.AddressEvent
-import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AddressEvent
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.SharedAddressViewModel
 import com.nrin31266.ecommercemultivendor.presentation.utils.ButtonType
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomButton
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox

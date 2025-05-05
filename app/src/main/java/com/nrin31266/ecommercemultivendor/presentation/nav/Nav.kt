@@ -44,6 +44,11 @@ sealed class CustomerRoutes(val route: String){
             return "add_edit_address_screen/$addressId"
         }
     }
+    data object PurchasedScreen : CustomerRoutes("purchased_screen/{tabIndex}"){
+        fun withPath(tabIndex: Int): String {
+            return "purchased_screen/$tabIndex"
+        }
+    }
 
 
 }

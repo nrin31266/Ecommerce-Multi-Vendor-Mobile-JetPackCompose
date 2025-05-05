@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
@@ -27,8 +26,6 @@ import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Payment
 import androidx.compose.material.icons.filled.PriceChange
-import androidx.compose.material.icons.outlined.AddCircle
-import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -36,7 +33,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -44,20 +40,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
-import com.nrin31266.ecommercemultivendor.presentation.components.DiscountLabel
 import com.nrin31266.ecommercemultivendor.presentation.components.address.AddressCardItem
 import com.nrin31266.ecommercemultivendor.presentation.components.checkout.PaymentMethod
 import com.nrin31266.ecommercemultivendor.presentation.components.checkout.PaymentMethodItem
@@ -65,7 +56,7 @@ import com.nrin31266.ecommercemultivendor.presentation.components.checkout.ShopC
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CheckoutEvent
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CheckoutViewModel
-import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.share.SharedAddressViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.SharedAddressViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.BasicNotification
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomButton

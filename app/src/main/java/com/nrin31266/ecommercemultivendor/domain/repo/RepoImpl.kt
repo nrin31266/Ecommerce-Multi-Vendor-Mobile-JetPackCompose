@@ -4,7 +4,8 @@ package com.nrin31266.ecommercemultivendor.domain.repo
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
-import com.nrin31266.ecommercemultivendor.common.toReadableErrorMoshi
+import com.nrin31266.ecommercemultivendor.common.toReadableError
+
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
@@ -45,7 +46,7 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
             val response = apiService.userLogin(authRequest)
             emit(ResultState.Success(response))
         }  catch (e: HttpException) {
-            emit(ResultState.Error(e.toReadableErrorMoshi()))
+            emit(ResultState.Error(e.toReadableError()))
         }  catch (e: Exception) {
             emit(ResultState.Error("Unknown error: ${e.localizedMessage}"))
         }
@@ -174,7 +175,7 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
             val response = apiCall()
             ResultState.Success(response)
         } catch (e: HttpException) {
-            ResultState.Error(e.toReadableErrorMoshi())
+            ResultState.Error(e.toReadableError())
         } catch (e: Exception) {
             ResultState.Error("Unknown error: ${e.localizedMessage}")
         }

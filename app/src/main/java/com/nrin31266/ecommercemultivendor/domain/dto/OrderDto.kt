@@ -38,5 +38,5 @@ data class OrderDto(
     val totalItem: Int,
     val payment: PaymentDto?=null,
     val paymentMethod: PAYMENT_METHOD,
-    val orderDate: LocalDateTime
+    val orderDate: String
 )

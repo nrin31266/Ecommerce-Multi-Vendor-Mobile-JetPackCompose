@@ -1,18 +1,15 @@
 package com.nrin31266.ecommercemultivendor.di
 
 import com.nrin31266.ecommercemultivendor.network.ApiService
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.converter.moshi.MoshiConverterFactory
+import retrofit2.converter.gson.GsonConverterFactory // ✅ Dùng Gson thay vì Moshi
 
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
-
 
 import android.util.Log
 import okhttp3.logging.HttpLoggingInterceptor
@@ -24,6 +21,7 @@ fun provideLoggingInterceptor(): HttpLoggingInterceptor {
     loggingInterceptor.level = HttpLoggingInterceptor.Level.BODY // Log chi tiết request và response
     return loggingInterceptor
 }
+
 @Module
 @InstallIn(SingletonComponent::class)
 object NetworkModule {
@@ -36,21 +34,15 @@ object NetworkModule {
             .build()
     }
 
-    @Provides
-    @Singleton
-    fun provideMoshi(): Moshi {
-        return Moshi.Builder()
-            .add(KotlinJsonAdapterFactory())
-            .build()
-    }
+    // ❌ Xóa provideMoshi (không cần nữa)
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient, moshi: Moshi): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://94df-2401-d800-421-5abf-7876-b031-2a0b-54.ngrok-free.app/")
+            .baseUrl("https://75f9-171-225-184-175.ngrok-free.app/")
             .client(okHttpClient)
-            .addConverterFactory(MoshiConverterFactory.create(moshi)) // Dùng MoshiConverterFactory
+            .addConverterFactory(GsonConverterFactory.create()) // ✅ Dùng Gson
             .build()
     }
 
@@ -60,5 +52,3 @@ object NetworkModule {
         return retrofit.create(ApiService::class.java)
     }
 }
-
-
