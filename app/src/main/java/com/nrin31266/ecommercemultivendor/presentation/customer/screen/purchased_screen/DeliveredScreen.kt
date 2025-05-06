@@ -39,7 +39,8 @@ fun DeliveredScreen(
                 items(render?.size ?: 0) {
                     SellerOrderCardItem(
                         sellerOrder = render!![it],
-                        purchasedViewModel = purchasedViewModel
+                        purchasedViewModel = purchasedViewModel,
+                        navController
                     )
                 }
             }

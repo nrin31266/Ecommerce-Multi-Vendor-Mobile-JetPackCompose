@@ -49,6 +49,16 @@ sealed class CustomerRoutes(val route: String){
             return "purchased_screen/$tabIndex"
         }
     }
+    data object SellerOrderDetailsScreen : CustomerRoutes("seller_order_details_screen/{sellerOrderId}"){
+        fun withPath(sellerOrderId: Long): String {
+            return "seller_order_details_screen/$sellerOrderId"
+        }
+    }
+    data object AddRatingScreen : CustomerRoutes("add_rating_screen/{orderId}"){
+        fun withPath(orderId: Long): String {
+            return "add_rating_screen/$orderId"
+        }
+    }
 
 
 }

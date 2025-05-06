@@ -1,5 +1,7 @@
 package com.nrin31266.ecommercemultivendor.presentation.components.purchased
 
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -11,6 +13,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.StarRate
+import androidx.compose.material.icons.filled.Stars
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -29,6 +33,7 @@ import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
+import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.PurchasedViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
@@ -75,21 +80,44 @@ fun SellerOrderCardItem(
             verticalArrangement = Arrangement.spacedBy(8.dp),
 
             ) {
-            val orderItems = sellerOrder.orderItems
-            if (showMore.value) {
-                orderItems?.map {
-                    OrderItem(
-                        orderItem = it
-                    )
-                }
+            val itemShow: List<OrderItemDto> = if (showMore.value) {
+                sellerOrder.orderItems ?: emptyList()
             } else {
-                orderItems?.take(1)?.map {
-                    OrderItem(
-                        orderItem = it
-                    )
-                }
+                sellerOrder.orderItems?.firstOrNull()?.let { listOf(it) } ?: emptyList()
             }
-            if (!showMore.value && orderItems?.size!! > 1) {
+
+            itemShow.map {
+                OrderItem(
+                    orderItem = it,
+                    extraContent = {
+                        if(!it.isRated && sellerOrder.status == SELLER_ORDER_STATUS.COMPLETED){
+                            CustomButton(
+                                backgroundColor = colorResource(R.color.elegant_gold),
+                                onClick = {
+                                    Log.d(TAG, "To rate order id: ${it.id} ")
+                                    navController?.navigate(CustomerRoutes.AddRatingScreen.withPath(
+                                        it.id
+                                    ))
+                                },
+                                type = ButtonType.OUTLINED,
+                                text = "Rate",
+                                size = ButtonSize.SMALL,
+                            )
+                        }else if(it.isRated!=null && it.isRated){
+                            CustomButton(
+                                backgroundColor = Color.Gray,
+                                onClick = {
+
+                                },
+                                type = ButtonType.OUTLINED,
+                                text = "Rated",
+                                size = ButtonSize.SMALL,
+                            )
+                        }
+                    }
+                )
+            }
+            if (!showMore.value && sellerOrder.orderItems?.size!! > 1) {
                 Row(
                     modifier = Modifier
                         .padding(8.dp)
@@ -193,3 +221,4 @@ fun SellerOrderCardItem(
         }
     }
 }
+

@@ -31,7 +31,7 @@ enum class ButtonType {
 
 
 enum class ButtonSize(val height: Dp, val textSize: TextUnit, val iconSize: Dp) {
-    SMALL(36.dp, 12.sp, 14.dp),
+    SMALL(34.dp, 14.sp, 10.dp),
     MEDIUM(48.dp, 14.sp, 18.dp),
     LARGE(56.dp, 16.sp, 20.dp),
     EXTRALARGE(64.dp, 18.sp, 24.dp)

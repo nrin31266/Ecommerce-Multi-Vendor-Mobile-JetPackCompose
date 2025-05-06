@@ -28,67 +28,77 @@ import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 
 @Composable
 fun OrderItem(
-    orderItem: OrderItemDto
+    orderItem: OrderItemDto,
+    extraContent: (@Composable () -> Unit)? = null
 ) {
     val product = orderItem.product
     val subProduct = orderItem.subProduct
 
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        AsyncImage(
-            model = orderItem.subProduct?.images?.firstOrNull(),
-            contentDescription = null,
-            modifier = Modifier
-                .width(90.dp)
-                .height(90.dp)
-                .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
-                .clip(RoundedCornerShape(4.dp))
-        )
-        Column(
-            modifier = Modifier.weight(1f),
-        ) {
-            Text(
-                orderItem.product?.title ?: "",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.SemiBold
-            )
+   Box{
+       Row(
+           horizontalArrangement = Arrangement.spacedBy(8.dp),
+       ) {
+           AsyncImage(
+               model = orderItem.subProduct?.images?.firstOrNull(),
+               contentDescription = null,
+               modifier = Modifier
+                   .width(90.dp)
+                   .height(90.dp)
+                   .border(1.dp, Color.LightGray, RoundedCornerShape(4.dp))
+                   .clip(RoundedCornerShape(4.dp))
+           )
+           Column(
+               modifier = Modifier.weight(1f),
+           ) {
+               Text(
+                   orderItem.product?.title ?: "",
+                   maxLines = 1,
+                   overflow = TextOverflow.Ellipsis,
+                   fontSize = 14.sp,
+                   fontWeight = FontWeight.SemiBold
+               )
 
-            if (!product.isSubProduct) {
-                val optionValues =
-                    subProduct.options?.joinToString(", ") { it.optionValue ?: "" }
-                Text(
-                    optionValues ?: "",
-                    fontSize = 13.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier
+               if (!product.isSubProduct) {
+                   val optionValues =
+                       subProduct.options?.joinToString(", ") { it.optionValue ?: "" }
+                   Text(
+                       optionValues ?: "",
+                       fontSize = 13.sp,
+                       maxLines = 1,
+                       overflow = TextOverflow.Ellipsis,
+                   )
+               }
+               Row(
+                   horizontalArrangement = Arrangement.spacedBy(4.dp),
+                   modifier = Modifier
 
-            ) {
-                Text(
-                    CurrencyConverter.toVND(orderItem?.sellingPrice!!),
-                    fontSize = 13.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-                Text(
-                    CurrencyConverter.toVND(orderItem?.mrpPrice!!),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.secondary,
-                    textDecoration = TextDecoration.LineThrough
-                )
-            }
-            Text("x${orderItem.quantity}",
-                fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.secondary)
+               ) {
+                   Text(
+                       CurrencyConverter.toVND(orderItem?.sellingPrice!!),
+                       fontSize = 13.sp,
+                       fontWeight = FontWeight.Bold,
+                       color = MaterialTheme.colorScheme.primary
+                   )
+                   Text(
+                       CurrencyConverter.toVND(orderItem?.mrpPrice!!),
+                       fontSize = 12.sp,
+                       fontWeight = FontWeight.SemiBold,
+                       color = MaterialTheme.colorScheme.secondary,
+                       textDecoration = TextDecoration.LineThrough
+                   )
+               }
+               Text("x${orderItem.quantity}",
+                   fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.secondary)
 
 
-        }
-    }
+           }
+       }
+       if(extraContent!=null){
+           Column (
+               modifier = Modifier.align(Alignment.BottomEnd)
+           ){
+               extraContent()
+           }
+       }
+   }
 }

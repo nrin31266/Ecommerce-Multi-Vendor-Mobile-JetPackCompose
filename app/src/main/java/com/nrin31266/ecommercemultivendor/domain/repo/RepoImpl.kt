@@ -1,6 +1,8 @@
 package com.nrin31266.ecommercemultivendor.domain.repo
 
 
+import android.net.Uri
+import com.google.firebase.storage.FirebaseStorage
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
@@ -9,13 +11,16 @@ import com.nrin31266.ecommercemultivendor.common.toReadableError
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
+import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
+import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateOrderRequest
+import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateReviewRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
@@ -30,11 +35,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
 import java.io.IOException
 import javax.inject.Inject
+import kotlin.coroutines.resumeWithException
 
-class RepoImpl @Inject constructor(private val apiService: ApiService,private val authPreferences: AuthPreferences) : Repo {
+class RepoImpl @Inject constructor(private val apiService: ApiService,private val authPreferences: AuthPreferences,
+    private val firebaseStorage: FirebaseStorage) : Repo {
     override fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>> = flow {
         emit(ResultState.Loading)
         emit(makeApiCall { apiService.userSignup(authRequest) })
@@ -174,6 +182,32 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         emit(makeApiCall { apiService.userConfirmSellerOrder(getBearerToken(), sellerOrderId) })
     }.flowOn(Dispatchers.IO)
 
+    override fun getReviewsByProductId(productId: Long): Flow<ResultState<List<ReviewDto>>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getReviewsByProductId(productId) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun addReview(productId: Long, rq: CreateReviewRequest, uris: List<Uri>): Flow<ResultState<ReviewDto>> = flow {
+        emit(ResultState.Loading)
+        if(uris.isNotEmpty()){
+            val reviewImages = uris.map { uri ->
+                uploadImageToFirebase(uri, "review_images", firebaseStorage)
+            }
+            rq.reviewImages = reviewImages
+        }
+        emit(makeApiCall { apiService.addReview(getBearerToken(),productId, rq) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun getFirstReviewByProductId(productId: Long): Flow<ResultState<ReviewDto?>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getFirstReviewByProductId(productId) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun getOrderItem(orderItem: Long): Flow<ResultState<OrderItemDto>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getOrderItem(getBearerToken(), orderItem) })
+    }.flowOn(Dispatchers.IO)
+
     private suspend fun getBearerToken(): String {
         val token = authPreferences.jwtFlow.firstOrNull()
             ?: throw IllegalStateException("Unauthorized")
@@ -191,6 +225,28 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         }
     }
 
+    private suspend fun uploadImageToFirebase(
+        uri: Uri,
+        folder: String? = "review_images",
+        firebaseStorage: FirebaseStorage
+    ): String = suspendCancellableCoroutine { cont ->
+        val filename = "${System.currentTimeMillis()}_${uri.lastPathSegment}"
+        val storageRef = firebaseStorage.reference.child("$folder/$filename")
+
+        storageRef.putFile(uri)
+            .continueWithTask { task ->
+                if (!task.isSuccessful) {
+                    throw task.exception ?: Exception("Upload failed")
+                }
+                storageRef.downloadUrl
+            }
+            .addOnSuccessListener { downloadUrl ->
+                cont.resume(downloadUrl.toString(), null)
+            }
+            .addOnFailureListener { e ->
+                cont.resumeWithException(e)
+            }
+    }
 
 
 }

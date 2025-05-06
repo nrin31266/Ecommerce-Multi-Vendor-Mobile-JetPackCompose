@@ -48,6 +48,7 @@ import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AccountScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AddEditAddressScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AddRatingScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.AddressScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CartScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CheckoutScreen
@@ -57,6 +58,7 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScr
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductDetailsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SellerOrderDetailsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.purchased_screen.PurchasedScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
@@ -268,6 +270,34 @@ fun App() {
                         val tabIndex = it.arguments?.getInt("tabIndex") ?: 0
                         PurchasedScreen(navController, tabIndex)
                     }
+                    composable(
+                        route = CustomerRoutes.SellerOrderDetailsScreen.route,
+                        arguments = listOf(
+                            navArgument("sellerOrderId") {
+                                type = NavType.LongType
+                                defaultValue = -1
+                            }
+                        )
+                    ) {
+                        val sellerOrderId = it.arguments?.getLong("sellerOrderId") ?: -1
+                        SellerOrderDetailsScreen(navController, sellerOrderId)
+                    }
+                    composable(
+                        route = CustomerRoutes.AddRatingScreen.route,
+                        arguments = listOf(
+                            navArgument("orderId") {
+                                type = NavType.LongType
+                                defaultValue = -1
+                            }
+                        )
+                    ) {
+                        val orderId = it.arguments?.getLong("orderId") ?: -1
+                        AddRatingScreen(
+                            navController,
+                            orderId
+                        )
+                    }
+
 
                 }
 

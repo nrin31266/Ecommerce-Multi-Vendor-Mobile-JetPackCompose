@@ -5,13 +5,16 @@ import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
+import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
+import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateOrderRequest
+import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateReviewRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
@@ -159,4 +162,27 @@ interface ApiService {
         @Header("Authorization") jwt: String,
         @Path("sellerOrderId") sellerOrderId: Long,
     ): SellerOrderDto
+
+    @POST("api/reviews/users/{orderItemId}")
+    suspend fun addReview(
+        @Header("Authorization") jwt: String,
+        @Path("orderItemId") orderItemId: Long,
+        @Body rq: CreateReviewRequest
+    ): ReviewDto
+
+    @GET("reviews/{productId}")
+    suspend fun getReviewsByProductId(
+        @Path("productId") productId: Long,
+    ): List<ReviewDto>
+
+    @GET("reviews/first/{productId}")
+    suspend fun getFirstReviewByProductId(
+        @Path("productId") productId: Long,
+    ): ReviewDto? = null
+
+    @GET("api/orders/item/{orderItem}")
+    suspend fun getOrderItem(
+        @Header("Authorization") jwt: String,
+        @Path("orderItem") orderItem: Long,
+    ): OrderItemDto
 }

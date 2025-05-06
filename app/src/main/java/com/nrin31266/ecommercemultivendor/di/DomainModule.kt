@@ -1,4 +1,5 @@
 package com.nrin31266.ecommercemultivendor.di
+import com.google.firebase.storage.FirebaseStorage
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.domain.repo.Repo
 import com.nrin31266.ecommercemultivendor.domain.repo.RepoImpl
@@ -17,8 +18,9 @@ object DomainModule {
     @Provides
     fun provideRepo(
         apiService: ApiService,
-        authPreferences: AuthPreferences
+        authPreferences: AuthPreferences,
+        firebaseStorage: FirebaseStorage
     ): Repo {
-        return RepoImpl(apiService, authPreferences)
+        return RepoImpl(apiService, authPreferences, firebaseStorage)
     }
 }

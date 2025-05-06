@@ -24,5 +24,6 @@ data class OrderItemDto(
     val quantity: Int,
     val mrpPrice: Long,
     val sellingPrice: Long,
-    val userId: Long
+    val userId: Long,
+    val isRated: Boolean = false
 )
