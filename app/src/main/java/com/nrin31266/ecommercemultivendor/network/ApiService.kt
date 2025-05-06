@@ -146,4 +146,17 @@ interface ApiService {
         @Header("Authorization") jwt: String,
         @Path("sellerOrderId") sellerOrderId: Long,
     ): SellerOrderDto
+
+    @PUT("api/users/orders/seller-order/cancel/{sellerOrderId}")
+    suspend fun userCancelSellerOrder(
+        @Header("Authorization") jwt: String,
+        @Path("sellerOrderId") sellerOrderId: Long,
+    ): SellerOrderDto
+
+
+    @PUT("api/users/orders/seller-order/confirm/{sellerOrderId}")
+    suspend fun userConfirmSellerOrder(
+        @Header("Authorization") jwt: String,
+        @Path("sellerOrderId") sellerOrderId: Long,
+    ): SellerOrderDto
 }

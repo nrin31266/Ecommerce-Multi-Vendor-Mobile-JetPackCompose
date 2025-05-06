@@ -8,17 +8,28 @@ import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.usecase.payment.GetUserOrdersUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.purchased.UserCancelSellerOrderUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.purchased.UserConfirmSellerOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.math.log
 
 @HiltViewModel
 class PurchasedViewModel @Inject constructor(
-    private val getUserOrdersUseCase: GetUserOrdersUseCase
+    private val getUserOrdersUseCase: GetUserOrdersUseCase,
+    private val userCancelSellerOrderUseCase: UserCancelSellerOrderUseCase,
+    private val userConfirmSellerOrderUseCase: UserConfirmSellerOrderUseCase
 ) : ViewModel() {
     private val _purchasedState = MutableStateFlow(PurchasedState())
     val purchasedState = _purchasedState.asStateFlow()
@@ -34,11 +45,148 @@ class PurchasedViewModel @Inject constructor(
     val deliveredState = _deliveredState.asStateFlow()
     private val _cancelledState = MutableStateFlow(CancelledState())
     val cancelledState = _cancelledState.asStateFlow()
+    private val _eventFlow = MutableSharedFlow<PurchasedEvent>()
+    val eventFlow = _eventFlow.asSharedFlow()
 
 
     fun selectTab(tabIndex: Int) {
         _purchasedState.value = _purchasedState.value.copy(tabIndex = tabIndex)
 
+    }
+
+    fun shippingAction() {
+        viewModelScope.launch {
+            _shippingState.value = _shippingState.value.copy(isLoading = true)
+
+            combine(
+                getUserOrdersUseCase(SELLER_ORDER_STATUS.SHIPPING),
+                getUserOrdersUseCase(SELLER_ORDER_STATUS.DELIVERED)
+            ) { shippingResult, deliveredResult ->
+
+                when {
+                    shippingResult is ResultState.Success && deliveredResult is ResultState.Success -> {
+                        val combinedList = deliveredResult.data + shippingResult.data
+                        _shippingState.value = _shippingState.value.copy(
+                            isLoading = false,
+                            shippingList = combinedList
+                        )
+                    }
+
+                    shippingResult is ResultState.Error -> {
+                        _shippingState.value = _shippingState.value.copy(
+                            isLoading = false,
+                            errorMessage = shippingResult.message
+                        )
+                    }
+
+                    deliveredResult is ResultState.Error -> {
+                        _shippingState.value = _shippingState.value.copy(
+                            isLoading = false,
+                            errorMessage = deliveredResult.message
+                        )
+                    }
+
+                    else -> {
+                        _shippingState.value = _shippingState.value.copy(
+                            isLoading = true
+                        )
+                    }
+                }
+            }.collect()
+        }
+    }
+
+    fun userConfirmSellerOrder(sellerOrderId: Long) {
+        viewModelScope.launch {
+            userConfirmSellerOrderUseCase(sellerOrderId).collectLatest {
+                when (it) {
+                    is ResultState.Loading -> {
+
+                    }
+
+                    is ResultState.Success -> {
+                        _eventFlow.emit(PurchasedEvent.PopToTab(4))
+                        _shippingState.value = _shippingState.value.copy(shippingList =
+                        _shippingState.value.shippingList?.filter { it.id != sellerOrderId })
+                        val confirmedOrder = it.data
+                        if (deliveredState.value.deliveredList == null) {
+                            deliveredAction()
+                        } else {
+                            val newDeliveredList: List<SellerOrderDto> =
+                                listOf(confirmedOrder) + deliveredState.value.deliveredList!!
+                            _deliveredState.value =
+                                _deliveredState.value.copy(deliveredList = newDeliveredList)
+                        }
+                    }
+
+                    is ResultState.Error -> {
+
+                    }
+
+                }
+            }
+
+        }
+    }
+
+
+    fun userCancelSellerOrder(sellerOrderId: Long) {
+        viewModelScope.launch {
+            userCancelSellerOrderUseCase(sellerOrderId).collectLatest {
+                when (it) {
+
+                    is ResultState.Loading -> {
+
+                    }
+
+                    is ResultState.Success -> {
+                        _eventFlow.emit(PurchasedEvent.PopToTab(5))
+                        _toConfirmState.value = _toConfirmState.value.copy(toConfirmList =
+                        _toConfirmState.value.toConfirmList?.filter { it.id != sellerOrderId })
+                        val cancelledOrder = it.data
+
+                        if (cancelledState.value.cancelledList == null) {
+                            cancelAction()
+                        } else {
+                            val newCancelledList: List<SellerOrderDto> =
+                                listOf(cancelledOrder) + cancelledState.value.cancelledList!!
+                            _cancelledState.value =
+                                _cancelledState.value.copy(cancelledList = newCancelledList)
+                        }
+
+
+                    }
+
+                    is ResultState.Error -> {
+
+                    }
+                }
+            }
+        }
+
+    }
+
+    fun deliveredAction() {
+        viewModelScope.launch {
+            getUserOrdersUseCase(SELLER_ORDER_STATUS.COMPLETED).collectLatest {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _deliveredState.value = _deliveredState.value.copy(isLoading = true)
+                    }
+
+                    is ResultState.Success -> {
+                        _deliveredState.value =
+                            _deliveredState.value.copy(isLoading = false, deliveredList = it.data)
+                    }
+
+                    is ResultState.Error -> {
+                        _deliveredState.value =
+                            _deliveredState.value.copy(isLoading = false, errorMessage = it.message)
+                    }
+                }
+            }
+
+        }
     }
 
     fun toConfirmAction() {
@@ -67,6 +215,7 @@ class PurchasedViewModel @Inject constructor(
         }
     }
 
+
     fun toPickupAction() {
         viewModelScope.launch {
             getUserOrdersUseCase(SELLER_ORDER_STATUS.CONFIRMED).collectLatest {
@@ -87,9 +236,35 @@ class PurchasedViewModel @Inject constructor(
                 }
 
             }
-
         }
     }
+
+    fun cancelAction() {
+        viewModelScope.launch {
+            getUserOrdersUseCase(SELLER_ORDER_STATUS.CANCELLED).collectLatest {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _cancelledState.value = _cancelledState.value.copy(isLoading = true)
+                    }
+
+                    is ResultState.Success -> {
+                        _cancelledState.value =
+                            _cancelledState.value.copy(isLoading = false, cancelledList = it.data)
+                    }
+
+                    is ResultState.Error -> {
+                        _cancelledState.value =
+                            _cancelledState.value.copy(isLoading = false, errorMessage = it.message)
+                    }
+                }
+            }
+        }
+    }
+
+    sealed class PurchasedEvent {
+        data class PopToTab(val tabIndex: Int) : PurchasedEvent()
+    }
+
 
 }
 
@@ -107,8 +282,9 @@ data class ToPayState(
 data class ToConfirmState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val toConfirmList: List<SellerOrderDto>? = null
-)
+    val toConfirmList: List<SellerOrderDto>? = null,
+
+    )
 
 data class ToPickupState(
     val isLoading: Boolean = false,
@@ -131,7 +307,7 @@ data class DeliveredState(
 data class CancelledState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val cancelledList: List<OrderItemDto> = emptyList()
+    val cancelledList: List<SellerOrderDto>? = null
 )
 
 

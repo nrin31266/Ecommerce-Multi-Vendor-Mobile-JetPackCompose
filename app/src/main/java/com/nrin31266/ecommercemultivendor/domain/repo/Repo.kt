@@ -55,6 +55,8 @@ interface Repo {
     fun createOrder(request: CreateOrderRequest): Flow<ResultState<PaymentResponse>>
     fun getUserOrders(status: SELLER_ORDER_STATUS): Flow<ResultState<List<SellerOrderDto>>>
     fun getUserOrderDetails(sellerOrderId: Long): Flow<ResultState<SellerOrderDto>>
+    fun userCancelSellerOrder(sellerOrderId: Long): Flow<ResultState<SellerOrderDto>>
+    fun userConfirmSellerOrder(sellerOrderId: Long): Flow<ResultState<SellerOrderDto>>
 
 
 }
