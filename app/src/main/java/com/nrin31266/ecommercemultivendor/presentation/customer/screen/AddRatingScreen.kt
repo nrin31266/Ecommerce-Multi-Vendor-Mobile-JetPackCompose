@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateReviewRequest
+import com.nrin31266.ecommercemultivendor.presentation.components.purchased.OrderItem
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AddRatingViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.ButtonSize
@@ -110,13 +111,15 @@ fun AddRatingScreen(
                     CustomMessageBox(state.value.errorMessage!!, type = MessageType.ERROR)
                 }
 
-                else -> {
+                state.value.orderItem!=null -> {
                     val orderItem = state.value.orderItem
                     CustomCard {
                         Column(
                             modifier = Modifier
                                 .padding(16.dp)
                         ) {
+                            OrderItem(orderItem = orderItem!!)
+                            Spacer(modifier = Modifier.height(16.dp))
                             Row {
                                 (1..5).forEach { i ->
                                     Icon(

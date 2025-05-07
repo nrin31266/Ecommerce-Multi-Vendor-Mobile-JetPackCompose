@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.nrin31266.ecommercemultivendor.R
-import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
+import com.nrin31266.ecommercemultivendor.common.funutils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes

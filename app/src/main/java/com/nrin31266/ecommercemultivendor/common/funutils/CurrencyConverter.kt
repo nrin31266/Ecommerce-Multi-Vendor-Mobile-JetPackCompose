@@ -1,4 +1,4 @@
-package com.nrin31266.ecommercemultivendor.common.fununtils
+package com.nrin31266.ecommercemultivendor.common.funutils
 
 import java.text.DecimalFormat
 

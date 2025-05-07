@@ -198,7 +198,7 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         emit(makeApiCall { apiService.addReview(getBearerToken(),productId, rq) })
     }.flowOn(Dispatchers.IO)
 
-    override fun getFirstReviewByProductId(productId: Long): Flow<ResultState<ReviewDto?>> = flow {
+    override fun getFirstReviewByProductId(productId: Long): Flow<ResultState<List<ReviewDto>>> = flow {
         emit(ResultState.Loading)
         emit(makeApiCall { apiService.getFirstReviewByProductId(productId) })
     }.flowOn(Dispatchers.IO)

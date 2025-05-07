@@ -1,33 +1,45 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductBottomSheet
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsBottomBar
@@ -38,10 +50,12 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.FullScreenLoading
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ImagesSlider
+import com.nrin31266.ecommercemultivendor.presentation.components.rating.RatingCardItem
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.BasicNotification
+import com.nrin31266.ecommercemultivendor.presentation.utils.HeaderSection
 import com.nrin31266.ecommercemultivendor.presentation.utils.IconButtonWithBadge
 import com.nrin31266.ecommercemultivendor.presentation.utils.MessageType
 import kotlinx.coroutines.flow.collectLatest
@@ -55,6 +69,7 @@ fun ProductDetailsScreen(
     authViewModel: AuthViewModel,
     cartViewModel: CartViewModel
 ) {
+
     val showDialog = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
     LaunchedEffect(Unit) {
@@ -63,6 +78,7 @@ fun ProductDetailsScreen(
         }
         Log.d("ProductDetailsScreen", "Product ID: $productId")
         viewModel.getProductDetails(productId.toLong())
+        viewModel.getFirstRating(productId.toLong())
 
         cartViewModel.addProductToCartEventFlow.collectLatest {
             when(it){
@@ -126,6 +142,11 @@ fun ProductDetailsScreen(
                         item {
                             androidx.compose.material.Divider()
                             Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        item {
+                            ProductDetailsRating(
+                                viewModel
+                            )
                         }
                         if(product.seller!=null){
                             item {
@@ -200,7 +221,59 @@ fun ProductDetailsScreen(
     }
 }
 
+@Composable
+fun ProductDetailsRating(
+    viewModel: ProductDetailsViewModel
+){
+    val ratingState = viewModel.productRatingState.collectAsStateWithLifecycle()
+    val state = viewModel.state.collectAsStateWithLifecycle()
 
+    val product = state.value.currentProduct
+    Column (
+        modifier = Modifier.background(Color.White)
+    ){
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+            HeaderSection(
+                extraTitle = {
+                    Row (
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ){
+                        Text("${product?.avgRating?:0}",
+                            style = MaterialTheme.typography.titleMedium)
+                        Icon(imageVector = Icons.Default.Star, "",
+                            tint = colorResource(R.color.elegant_gold)
+                        )
+                        Box(modifier = Modifier
+                            .width(2.dp)
+                            .height(20.dp)
+                            .background(Color.LightGray),)
+                        Text("${product?.numberRating} rated",
+                            style = MaterialTheme.typography.bodyMedium)
+                    }
+                },
+                actionName = "All"
+            )
+        }
+        Divider()
+        Column (
+            modifier = Modifier.padding(8.dp)
+        ){
+            val listRating = ratingState.value.data
+            if(!listRating.isNullOrEmpty()){
+                Text("New rating", style = MaterialTheme.typography.bodySmall, color = Color.Gray)
+                listRating.forEach {
+                    RatingCardItem(it) // không dùng key, không dùng map
+                }
+
+            }else if(listRating.isNullOrEmpty()  && !ratingState.value.isLoading){
+                Text("No rating")
+            }
+        }
+    }
+}
 
 
 

@@ -24,7 +24,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.nrin31266.ecommercemultivendor.R
-import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
+import com.nrin31266.ecommercemultivendor.common.funutils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.presentation.components.DiscountLabel
 

@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
-import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
+import com.nrin31266.ecommercemultivendor.common.funutils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ShopCartGroupResponse
 
 @Composable

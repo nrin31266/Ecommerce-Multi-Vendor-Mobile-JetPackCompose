@@ -77,7 +77,7 @@ fun AccountScreen(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .background(colorResource(R.color.elegant_gold))
+                                .background(colorResource(R.color.warm_gray))
                                 .padding(
                                     top = WindowInsets.statusBars
                                         .asPaddingValues()
@@ -138,9 +138,11 @@ fun AccountScreen(
                             HeaderSection(
                                 title = "Purchase order",
                                 actionName = "Purchase history",
-                                onActionClick = {}
+                                onActionClick = {
+                                    navController.navigate(CustomerRoutes.PurchasedScreen.withPath(4))
+                                }
                             )
-                            PurchaseContent(navController)
+                            PurchaseContent(navController, modifier = Modifier.padding(vertical = 16.dp))
                         }
                     }
                 }
@@ -163,7 +165,7 @@ fun PurchaseItemComponent(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
-        modifier = Modifier.height(100.dp).clickable {
+        modifier = Modifier.clickable {
             item.onClick()
         } // hoặc chiều cao bạn cần
     ) {
@@ -186,9 +188,9 @@ fun PurchaseItemComponent(
 }
 
 @Composable
-fun PurchaseContent(navController: NavController) {
+fun PurchaseContent(navController: NavController, modifier: Modifier=Modifier) {
     Row(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {

@@ -5,40 +5,77 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
+import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.usecase.cart.AddProductToCartUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.products.GetProductDetailsUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.rating.AddRatingUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.rating.GetFirstRatingUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
     val getProductDetailsUseCase: GetProductDetailsUseCase,
-    val addProductToCartUseCase: AddProductToCartUseCase
+    private val getFirstRatingUseCase: GetFirstRatingUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProductDetailsState())
     val state: StateFlow<ProductDetailsState> = _state
 
 
-
     private val _productOptionState = MutableStateFlow(ProductOptionState())
-    val productOptionState: StateFlow<ProductOptionState> = _productOptionState
+    val productOptionState: StateFlow<ProductOptionState> = _productOptionState.asStateFlow()
 
+
+    private val _productRatingState = MutableStateFlow(ProductDetailsRating())
+    val productRatingState: StateFlow<ProductDetailsRating> = _productRatingState.asStateFlow()
+
+
+    fun getFirstRating(productId: Long) {
+        viewModelScope.launch {
+            getFirstRatingUseCase(productId).collect {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _productRatingState.value =
+                            _productRatingState.value.copy(isLoading = true, errorMessage = null)
+                    }
+
+                    is ResultState.Success -> {
+                        _productRatingState.value = _productRatingState.value.copy(
+                            data = it.data,
+                            isLoading = false,
+                        )
+                    }
+
+                    is ResultState.Error -> {
+                        _productRatingState.value =
+                            _productRatingState.value.copy(
+                                errorMessage = it.message,
+                                isLoading = false
+                            )
+                    }
+                }
+            }
+        }
+    }
 
     fun getProductDetails(id: Long) {
         viewModelScope.launch {
             getProductDetailsUseCase(id).collect {
                 when (it) {
                     is ResultState.Loading -> {
-                        _state.value = _state.value.copy(isLoading = true, errorMessage = null, quantity = 1,
-                            isOpenSheetBottom = false)
+                        _state.value = _state.value.copy(
+                            isLoading = true, errorMessage = null, quantity = 1,
+                            isOpenSheetBottom = false
+                        )
                     }
 
                     is ResultState.Success -> {
@@ -69,7 +106,8 @@ class ProductDetailsViewModel @Inject constructor(
                 selectedOptions = _productOptionState.value.selectedOptions + (type to value)
             )
         }
-        _state.value = _state.value.copy(currentSubProductDto = findMatchingSubProduct(_productOptionState.value.selectedOptions))
+        _state.value =
+            _state.value.copy(currentSubProductDto = findMatchingSubProduct(_productOptionState.value.selectedOptions))
     }
 
     fun updateQuantity(quantity: Int) {
@@ -125,7 +163,7 @@ class ProductDetailsViewModel @Inject constructor(
                 mapKeyToOptionMap = newMapKeyToOptionMap,
                 mapKeySubProductImages = newMapKeySubProductImages
             )
-        }else if(product != null && product.isSubProduct ){
+        } else if (product != null && product.isSubProduct) {
             _state.value = _state.value.copy(currentSubProductDto = product.subProducts?.get(0))
         }
     }
@@ -152,7 +190,13 @@ data class ProductDetailsState(
     var favCurrentProduct: Boolean = true,
     var quantity: Int = 1,
     var isOpenSheetBottom: Boolean = false,
-    var currentSubProductDto: SubProductDto?= null
+    var currentSubProductDto: SubProductDto? = null,
+)
+
+data class ProductDetailsRating(
+    var data: List<ReviewDto>? = null,
+    var isLoading: Boolean = false,
+    var errorMessage: String? = null,
 )
 
 data class ProductOptionState(

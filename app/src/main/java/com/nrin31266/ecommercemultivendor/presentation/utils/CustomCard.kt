@@ -15,23 +15,30 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CustomCard(
     modifier: Modifier = Modifier,
+    shape: RoundedCornerShape = RoundedCornerShape(4.dp),
+    backgroundColor: Color = Color.White,
+    contentPaddingHorizontal: Int = 4,
+    contentPaddingVertical: Int = 8,
+    elevationDp: Int = 8,
+    shadowDp: Int = 1,
+    shadowColor: Color = Color.LightGray,
     content: @Composable () -> Unit
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 4.dp, vertical = 8.dp)
+            .padding(horizontal = contentPaddingHorizontal.dp, vertical = contentPaddingVertical.dp)
             .shadow(
-                1.dp,
-                spotColor = Color.LightGray
+                shadowDp.dp,
+                spotColor = shadowColor
             )
-            .clip(RoundedCornerShape(4.dp)),
-        shape = RoundedCornerShape(4.dp),
+            .clip(shape),
+        shape = shape,
         colors = CardDefaults.cardColors(
-            containerColor = Color.White
+            containerColor = backgroundColor
         ),
-        elevation = CardDefaults.cardElevation(8.dp)
-    ){
+        elevation = CardDefaults.cardElevation(elevationDp.dp)
+    ) {
         content()
     }
 }

@@ -63,7 +63,7 @@ interface Repo {
     fun userConfirmSellerOrder(sellerOrderId: Long): Flow<ResultState<SellerOrderDto>>
     fun getReviewsByProductId(productId: Long): Flow<ResultState<List<ReviewDto>>>
     fun addReview(productId: Long, rq: CreateReviewRequest, uris: List<Uri>): Flow<ResultState<ReviewDto>>
-    fun getFirstReviewByProductId(productId: Long): Flow<ResultState<ReviewDto?>>
+    fun getFirstReviewByProductId(productId: Long): Flow<ResultState<List<ReviewDto>>>
     fun getOrderItem(orderItem: Long): Flow<ResultState<OrderItemDto>>
 
 

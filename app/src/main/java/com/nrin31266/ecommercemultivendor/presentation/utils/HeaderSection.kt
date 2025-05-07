@@ -21,13 +21,14 @@ fun HeaderSection(
     modifier: Modifier = Modifier,
     icon: ImageVector?=null,
     iconTint: Color = MaterialTheme.colorScheme.primary,
-    title: String,
+    title: String?=null,
     titleSize: TextUnit = 16.sp,
     actionName: String = "View",
     actionColor: Color = Color.Gray,
     actionIcon: ImageVector = Icons.Default.ArrowForwardIos,
     actionIconSize: Dp = 12.dp,
-    onActionClick: (() -> Unit)? = null
+    onActionClick: (() -> Unit)? = null,
+    extraTitle: (@Composable () -> Unit)? = null
 ) {
     Row(
         modifier = modifier.fillMaxWidth(),
@@ -45,10 +46,14 @@ fun HeaderSection(
                    tint = iconTint
                )
            }
-            Text(
-                text = title,
-                fontSize = titleSize
-            )
+            if(title!=null){
+                Text(
+                    text = title,
+                    fontSize = titleSize
+                )
+            }else if(extraTitle != null) {
+                extraTitle()
+            }
         }
         Row(
             verticalAlignment = Alignment.CenterVertically,

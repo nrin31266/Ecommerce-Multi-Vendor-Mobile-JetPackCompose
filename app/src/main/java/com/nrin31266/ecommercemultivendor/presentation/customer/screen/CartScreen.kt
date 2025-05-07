@@ -1,7 +1,5 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -19,17 +17,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Message
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -37,13 +30,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
-import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
-import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
+import com.nrin31266.ecommercemultivendor.common.funutils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.presentation.components.DiscountLabel
 import com.nrin31266.ecommercemultivendor.presentation.components.cart.GroupCartBySeller
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
-import com.nrin31266.ecommercemultivendor.presentation.utils.BasicNotification
 import com.nrin31266.ecommercemultivendor.presentation.utils.ConfirmDialog
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomButton
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox

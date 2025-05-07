@@ -48,7 +48,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
-import com.nrin31266.ecommercemultivendor.common.fununtils.CurrencyConverter
+import com.nrin31266.ecommercemultivendor.common.funutils.CurrencyConverter
 import com.nrin31266.ecommercemultivendor.presentation.components.address.AddressCardItem
 import com.nrin31266.ecommercemultivendor.presentation.components.checkout.PaymentMethod
 import com.nrin31266.ecommercemultivendor.presentation.components.checkout.PaymentMethodItem

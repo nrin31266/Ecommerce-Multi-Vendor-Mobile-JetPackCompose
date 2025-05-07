@@ -178,7 +178,7 @@ interface ApiService {
     @GET("reviews/first/{productId}")
     suspend fun getFirstReviewByProductId(
         @Path("productId") productId: Long,
-    ): ReviewDto? = null
+    ): List<ReviewDto>
 
     @GET("api/orders/item/{orderItem}")
     suspend fun getOrderItem(
