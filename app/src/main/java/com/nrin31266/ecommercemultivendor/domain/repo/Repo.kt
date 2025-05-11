@@ -4,6 +4,7 @@ import android.net.Uri
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
+import com.nrin31266.ecommercemultivendor.domain.dto.BannerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
@@ -20,6 +21,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.HomeCategoryResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PaymentResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
@@ -65,6 +67,9 @@ interface Repo {
     fun addReview(productId: Long, rq: CreateReviewRequest, uris: List<Uri>): Flow<ResultState<ReviewDto>>
     fun getFirstReviewByProductId(productId: Long): Flow<ResultState<List<ReviewDto>>>
     fun getOrderItem(orderItem: Long): Flow<ResultState<OrderItemDto>>
+    fun getHomeCategories(): Flow<ResultState<HomeCategoryResponse>>
+    fun getHomeBanners(): Flow<ResultState<List<BannerDto>>>
+
 
 
 

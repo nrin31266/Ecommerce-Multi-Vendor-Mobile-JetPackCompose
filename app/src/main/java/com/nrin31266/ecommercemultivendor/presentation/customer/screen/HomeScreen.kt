@@ -6,19 +6,21 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import com.nrin31266.ecommercemultivendor.presentation.components.home.HomeCategorySection
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.HomeViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
+import com.nrin31266.ecommercemultivendor.presentation.utils.Banner
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomMessageBox
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import com.nrin31266.ecommercemultivendor.presentation.utils.IconButtonWithBadge
@@ -30,7 +32,8 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.SearchBar
 fun HomeScreen(
     navController: NavController,
     authViewModel: AuthViewModel,
-    cartViewModel: CartViewModel
+    cartViewModel: CartViewModel,
+    homeViewModel: HomeViewModel
 ) {
 
     val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
@@ -60,17 +63,39 @@ fun HomeScreen(
         contentWindowInsets = WindowInsets(0),
 
         ) { innerPadding ->
-        Column(
+        val homeState = homeViewModel.state.collectAsStateWithLifecycle()
+
+        LazyColumn(
             modifier = Modifier
                 .padding(innerPadding)
                 .fillMaxSize()
 
         ) {
 
-            CustomMessageBox(
-                message = authState.value.jwt?:"Not logged in",
-                MessageType.ERROR
-            )
+
+
+            item {
+                Banner(homeState.value.banners)
+            }
+            item{
+                HomeCategorySection(homeState.value.homeCategory.electronics, "Electronics", navController)
+            }
+            item{
+                HomeCategorySection(homeState.value.homeCategory.men, "Men", navController)
+            }
+            item{
+                HomeCategorySection(homeState.value.homeCategory.women, "Women", navController)
+            }
+            item{
+                HomeCategorySection(homeState.value.homeCategory.homeFurniture, "Home Furniture", navController)
+            }
+
+            item{
+                CustomMessageBox(
+                    message = authState.value.jwt?:"Not logged in",
+                    MessageType.ERROR
+                )
+            }
         }
     }
 

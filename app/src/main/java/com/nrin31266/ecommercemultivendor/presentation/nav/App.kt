@@ -63,6 +63,7 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScr
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.purchased_screen.PurchasedScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
+import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.HomeViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProfileViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.SharedAddressViewModel
 
@@ -72,6 +73,7 @@ fun App() {
     val cartViewModel: CartViewModel = hiltViewModel()
     val profileViewModel: ProfileViewModel = hiltViewModel()
     val sharedAddressViewModel: SharedAddressViewModel = hiltViewModel()
+    val homeViewModel: HomeViewModel = hiltViewModel()
 
     val context = LocalContext.current
     val navController = rememberNavController()
@@ -154,7 +156,7 @@ fun App() {
                 ) {
 
                     composable(CustomerRoutes.CustomerHomeScreen.route) {
-                        HomeScreen(navController, authViewModel, cartViewModel)
+                        HomeScreen(navController, authViewModel, cartViewModel, homeViewModel)
                     }
                     composable(CustomerRoutes.CustomerAccountScreen.route) {
                         AccountScreen(navController, authViewModel)

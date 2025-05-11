@@ -175,19 +175,28 @@ class AuthViewModel @Inject constructor(
                                 )
                             }
                             is ResultState.Success -> {
-                                _userAuthState.value = _userAuthState.value.copy(
-                                    isInitLoading = false,
-                                    isInitErrorMessage = null,
-                                    jwt = jwt,
-                                    isLogin = true
-                                )
+                                if(it.data.validToken == true){
+                                    _userAuthState.value = _userAuthState.value.copy(
+                                        isInitLoading = false,
+                                        isInitErrorMessage = null,
+                                        jwt = jwt,
+                                        isLogin = true
+                                    )
+                                }else{
+                                    _userAuthState.value = _userAuthState.value.copy(
+                                        isInitLoading = false,
+                                        isInitErrorMessage = it.data.details,
+                                        jwt = null,
+                                        isLogin = false
+                                    )
+                                }
+
                             }
                             is ResultState.Error -> {
                                 _userAuthState.value = _userAuthState.value.copy(
                                     isInitLoading = false,
                                     isInitErrorMessage = it.message
                                 )
-
                             }
                         }
                     }

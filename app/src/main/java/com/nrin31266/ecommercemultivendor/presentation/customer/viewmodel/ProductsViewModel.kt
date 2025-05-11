@@ -1,5 +1,6 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -35,7 +36,7 @@ class ProductsViewModel @Inject constructor(
         val search = savedStateHandle.get<String>("search")?.takeIf { it.isNotBlank() }
         val category = savedStateHandle.get<String>("category")?.takeIf { it.isNotBlank() }
         val sort = savedStateHandle.get<String>("sort")?.takeIf { it.isNotBlank() }
-
+        Log.d(TAG, "Query: $search, $category, $sort")
         getProduct(search, category, sort)
     }
 
@@ -64,7 +65,7 @@ class ProductsViewModel @Inject constructor(
                             category = category,
                             sort = sort,
                             pageNumber = 1,
-                            products = rs.data.content,
+                            products = rs.data.content?: emptyList(),
                             totalPages = rs.data.totalPages,
                             totalElements = rs.data.totalElements,
                             lastPage = rs.data.last,

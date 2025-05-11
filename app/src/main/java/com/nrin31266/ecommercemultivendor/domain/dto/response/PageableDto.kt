@@ -1,7 +1,7 @@
 package com.nrin31266.ecommercemultivendor.domain.dto.response
 
 data class PageableDto<T>(
-    val content: List<T>,  // Nội dung trang hiện tại
+    val content: List<T> = emptyList(),  // Nội dung trang hiện tại
     val totalPages: Int,   // Tổng số trang
     val totalElements: Int,// Tổng số phần tử trong tất cả các trang
     val size: Int,         // Kích thước trang
