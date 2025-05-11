@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
+import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.usecase.auth.SendEmailOtpUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.auth.UserLoginUseCase
@@ -28,6 +30,8 @@ class ProductsViewModel @Inject constructor(
     private val _state = MutableStateFlow(State())
     val state: StateFlow<State> = _state
 
+
+
     init {
 //        "shoes"	"shoes"
 //        ""	null
@@ -37,18 +41,55 @@ class ProductsViewModel @Inject constructor(
         val category = savedStateHandle.get<String>("category")?.takeIf { it.isNotBlank() }
         val sort = savedStateHandle.get<String>("sort")?.takeIf { it.isNotBlank() }
         Log.d(TAG, "Query: $search, $category, $sort")
-        getProduct(search, category, sort)
+        _state.value = _state.value.copy(
+            search = search,
+            category = category,
+            sort = sort
+        )
+        getProduct()
     }
 
-    fun getProduct(search: String? = null, category: String? = null, sort: String? = null) {
+    fun onChangeFilter(filter: ProductFilter) {
+        _state.update {
+            when (filter) {
+                is ProductFilter.Price -> it.copy(priceFilter = filter.filter)
+                is ProductFilter.Rating -> it.copy(ratingFilter = filter.filter)
+            }
+        }
+    }
+
+
+    fun onResetFilter(){
+        _state.value = _state.value.copy(
+            priceFilter = null,
+            ratingFilter = null,
+            products = emptyList()
+        )
+        onToggleRightSheet()
+        getProduct()
+    }
+
+    fun onFilter(){
+        _state.value = _state.value.copy(
+            products = emptyList()
+        )
+        onToggleRightSheet()
+        getProduct()
+    }
+
+     fun onToggleRightSheet(){
+        _state.value = _state.value.copy(isVisibleRightSheet = !state.value.isVisibleRightSheet)
+    }
+
+    private fun getProduct() {
         viewModelScope.launch {
-
-
             getProductUseCase(
                 pageNumber = 1,
-                search = search,
-                category = category,
-                sort = sort
+                search = state.value.search,
+                category = state.value.category,
+                sort = state.value.sort,
+                priceFilter = state.value.priceFilter,
+                ratingFilter = state.value.ratingFilter
             ).collect { rs->
                 when (rs) {
                     is ResultState.Loading -> {
@@ -61,9 +102,6 @@ class ProductsViewModel @Inject constructor(
                     is ResultState.Success -> {
                         _state.value = _state.value.copy(
                             isLoading = false,
-                            search = search,
-                            category = category,
-                            sort = sort,
                             pageNumber = 1,
                             products = rs.data.content?: emptyList(),
                             totalPages = rs.data.totalPages,
@@ -92,8 +130,10 @@ class ProductsViewModel @Inject constructor(
                 pageNumber = state.value.pageNumber + 1,
                 search = state.value.search,
                 category = state.value.category,
-                sort = state.value.sort
-            ).collect { it ->
+                sort = state.value.sort,
+                priceFilter = state.value.priceFilter,
+                ratingFilter = state.value.ratingFilter
+            ).collect {
                 when (it) {
 
                     is ResultState.Loading -> {
@@ -128,7 +168,15 @@ class ProductsViewModel @Inject constructor(
             }
         }
     }
+    sealed class ProductsEvent {
+        data class ShowSnackbar(val message: String): ProductsEvent()
+    }
 
+
+    sealed class ProductFilter {
+        data class Price(val filter: PRICE_FILTER?) : ProductFilter()
+        data class Rating(val filter: RATING_FILTER?) : ProductFilter()
+    }
 }
 
 data class State(
@@ -146,8 +194,12 @@ data class State(
     val sort: String? = null,
     val search: String? = null,
 
+    //filter
+    val priceFilter: PRICE_FILTER? = null,
+    val ratingFilter: RATING_FILTER? = null,
+
+    val isVisibleRightSheet: Boolean = false,
+
     )
 
-sealed class ProductsEvent {
-    data class ShowSnackbar(val message: String): ProductsEvent()
-}
+

@@ -5,6 +5,8 @@ import android.net.Uri
 import com.google.firebase.storage.FirebaseStorage
 import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
+import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.common.toReadableError
 
@@ -83,9 +85,11 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         sort: String?,
         pageNumber: Int?,
         search: String?
+        , priceFilter: PRICE_FILTER?,
+        ratingFilter: RATING_FILTER?
     ): Flow<ResultState<PageableDto<ProductDto>>> = flow {
         emit(ResultState.Loading)
-        emit(makeApiCall { apiService.getProducts(category, sort, pageNumber, search) })
+        emit(makeApiCall { apiService.getProducts(category, sort, pageNumber, search, priceFilter, ratingFilter) })
     }.flowOn(Dispatchers.IO)
 
     override fun getProductDetail(id: Long): Flow<ResultState<ProductDto>> = flow{

@@ -1,6 +1,8 @@
 package com.nrin31266.ecommercemultivendor.network
 
 import com.nrin31266.ecommercemultivendor.common.ResultState
+import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
+import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.BannerDto
@@ -54,24 +56,14 @@ interface ApiService {
     suspend fun sendEmailOtp(@Body request: AuthRequest): ApiResponseNoData
     @POST("auth/valid-token")
     suspend fun verifyToken(@Body request: VerifyTokenRequest): VerifyTokenResponse
-//    @RequestParam(required = false) String category,
-//    @RequestParam(required = false) String brand,
-//    @RequestParam(required = false) String colors,
-//    @RequestParam(required = false) String sizes,
-//    @RequestParam(required = false) Integer minimumPrice,
-//    @RequestParam(required = false) Integer maximumPrice,
-//    @RequestParam(required = false) Integer minimumDiscount,
-//    @RequestParam(required = false) String sort,
-//    @RequestParam(required = false) String stock,
-//    @RequestParam(defaultValue = "1", required = false) Integer pageNumber,
-//    @RequestParam(required = false) String search
     @GET("products")
     suspend fun getProducts(
         @Query("category") category: String? = null,
         @Query("sort") sort: String? = null,
         @Query("pageNumber") pageNumber: Int? = null,
         @Query("search") search: String? = null,
-
+        @Query("priceFilter") priceFilter: PRICE_FILTER? = null,
+        @Query("ratingFilter") ratingFilter: RATING_FILTER?= null
     ): PageableDto<ProductDto>
 
     @GET("products/{id}")
