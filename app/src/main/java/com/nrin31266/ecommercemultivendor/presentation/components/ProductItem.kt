@@ -139,7 +139,7 @@ fun ProductItem(
             AsyncImage(
                 model = item.images.firstOrNull(),
                 contentDescription = item.title,
-                contentScale = ContentScale.Crop,
+                contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .height(180.dp)
                     .fillMaxWidth()

@@ -8,6 +8,7 @@ import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
+import com.nrin31266.ecommercemultivendor.common.constant.SORT_PRODUCTS
 import com.nrin31266.ecommercemultivendor.common.toReadableError
 
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
@@ -82,7 +83,7 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
 
     override fun getProducts(
         category: String?,
-        sort: String?,
+        sort: SORT_PRODUCTS?,
         pageNumber: Int?,
         search: String?
         , priceFilter: PRICE_FILTER?,

@@ -9,6 +9,7 @@ import com.nrin31266.ecommercemultivendor.common.AuthPreferences
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
+import com.nrin31266.ecommercemultivendor.common.constant.SORT_PRODUCTS
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.usecase.auth.SendEmailOtpUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.auth.UserLoginUseCase
@@ -39,12 +40,19 @@ class ProductsViewModel @Inject constructor(
 //        null	null
         val search = savedStateHandle.get<String>("search")?.takeIf { it.isNotBlank() }
         val category = savedStateHandle.get<String>("category")?.takeIf { it.isNotBlank() }
-        val sort = savedStateHandle.get<String>("sort")?.takeIf { it.isNotBlank() }
-        Log.d(TAG, "Query: $search, $category, $sort")
+//        val sort = savedStateHandle.get<String>("sort")?.takeIf { it.isNotBlank() }
+        Log.d(TAG, "Query: $search, $category")
         _state.value = _state.value.copy(
             search = search,
             category = category,
-            sort = sort
+        )
+        getProduct()
+    }
+
+    fun onSort(sort: SORT_PRODUCTS){
+        _state.value = _state.value.copy(
+            sort = sort,
+            products = emptyList()
         )
         getProduct()
     }
@@ -191,7 +199,7 @@ data class State(
     val pageNumber: Int = 1, // number
 
     val category: String? = null,
-    val sort: String? = null,
+    val sort: SORT_PRODUCTS = SORT_PRODUCTS.DEFAULT,
     val search: String? = null,
 
     //filter

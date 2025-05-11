@@ -23,11 +23,13 @@ import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -67,6 +69,7 @@ import com.google.accompanist.flowlayout.FlowRow
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
+import com.nrin31266.ecommercemultivendor.common.constant.SORT_PRODUCTS
 import com.nrin31266.ecommercemultivendor.presentation.components.ProductItem
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.ProductsViewModel
 import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
@@ -129,11 +132,17 @@ fun ProductsScreen(
                             navController.navigate(CustomerRoutes.SearchScreen.route)
                         }
                     }, hint = search ?: "Search now...")
+
                 },
                 onActionClick = {
                     viewModel.onToggleRightSheet()
                 },
-                actionIcon = Icons.Default.FilterAlt
+                actionIcon = Icons.Default.FilterAlt,
+                extraContent = {
+                    SortSection(viewModel)
+                    Spacer(modifier = Modifier.height(8.dp))
+                },
+                hasDivider = true
 
             )
         },
@@ -161,6 +170,7 @@ fun ProductsScreen(
                         verticalArrangement = Arrangement.spacedBy(8.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+
                         itemsIndexed(state.value.products) { index, product ->
                             ProductItem(
                                 item = product,
@@ -235,6 +245,63 @@ data class RatingFilter(
     val label: String,
     val value: RATING_FILTER
 )
+
+data class SortProduct(
+    val label: String,
+    val value: SORT_PRODUCTS
+)
+
+@Composable
+fun SortSection( viewModel: ProductsViewModel){
+    val state = viewModel.state.collectAsStateWithLifecycle()
+
+    val sortProductList = listOf(
+        SortProduct("Default", SORT_PRODUCTS.DEFAULT),
+        SortProduct("New", SORT_PRODUCTS.NEW),
+        SortProduct("Bestseller", SORT_PRODUCTS.BESTSELLER),
+        SortProduct("Price ▲", SORT_PRODUCTS.PRICE_LOW),
+        SortProduct("Price ▼", SORT_PRODUCTS.PRICE_HIGH),
+    )
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        sortProductList.forEach {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .wrapContentSize(Alignment.Center) // Để text căn giữa trong phần được chia
+                    .clickable {
+                        viewModel.onSort(it.value)
+                    },
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = it.label,
+                    fontSize = 14.sp,
+                    color = if (state.value.sort == it.value) MaterialTheme.colorScheme.primary else Color.Black
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(top = 2.dp)
+                        .height(3.dp)
+                        .fillMaxWidth(0.8f) // Cho underline nhỏ gọn hơn text
+                        .background(
+                            if (state.value.sort == it.value) MaterialTheme.colorScheme.primary else Color.Transparent,
+                            shape = RoundedCornerShape(2.dp)
+                        )
+                )
+            }
+        }
+    }
+
+
+}
+
+
 
 
 @OptIn(ExperimentalLayoutApi::class)

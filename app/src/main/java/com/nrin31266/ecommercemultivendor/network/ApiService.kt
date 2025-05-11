@@ -4,6 +4,7 @@ import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
+import com.nrin31266.ecommercemultivendor.common.constant.SORT_PRODUCTS
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.BannerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
@@ -59,7 +60,7 @@ interface ApiService {
     @GET("products")
     suspend fun getProducts(
         @Query("category") category: String? = null,
-        @Query("sort") sort: String? = null,
+        @Query("sort") sort: SORT_PRODUCTS? = null,
         @Query("pageNumber") pageNumber: Int? = null,
         @Query("search") search: String? = null,
         @Query("priceFilter") priceFilter: PRICE_FILTER? = null,
