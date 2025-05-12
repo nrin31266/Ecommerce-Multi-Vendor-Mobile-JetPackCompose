@@ -7,5 +7,5 @@ import java.time.LocalDateTime
 //LocalDateTime paymentDate;
 data class PaymentDetailsDto(
     val paymentStatus: PAYMENT_STATUS,
-    val paymentDate: LocalDateTime?=null
+    val paymentDate: String?=null
 )

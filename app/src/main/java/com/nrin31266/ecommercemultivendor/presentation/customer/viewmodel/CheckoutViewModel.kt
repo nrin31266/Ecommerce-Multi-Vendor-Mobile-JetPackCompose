@@ -43,7 +43,11 @@ class CheckoutViewModel @Inject constructor(
                     }
                     is ResultState.Success -> {
                         _createOrderState.value = _createOrderState.value.copy(isLoading = false)
-                        _checkoutEvent.emit(CheckoutEvent.PaymentSuccess(""))
+                        if (it.data.payment_link_url != null) {
+                            _checkoutEvent.emit(CheckoutEvent.OpenLinkPayment(it.data.payment_link_url))
+                        }else{
+                            _checkoutEvent.emit(CheckoutEvent.PaymentSuccess(""))
+                        }
                     }
                     is ResultState.Error -> {
                         _createOrderState.value = _createOrderState.value.copy(isLoading = false,

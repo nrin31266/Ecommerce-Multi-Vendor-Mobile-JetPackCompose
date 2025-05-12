@@ -237,6 +237,11 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         emit(makeApiCall { apiService.checkWishlist(getBearerToken(), productId) })
     }.flowOn(Dispatchers.IO)
 
+    override fun getRelatedProducts(productId: Long): Flow<ResultState<List<ProductDto>>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getRelatedProducts(productId) })
+    }.flowOn(Dispatchers.IO)
+
     private suspend fun getBearerToken(): String {
         val token = authPreferences.jwtFlow.firstOrNull()
             ?: throw IllegalStateException("Unauthorized")

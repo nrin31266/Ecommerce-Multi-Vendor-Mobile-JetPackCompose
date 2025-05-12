@@ -63,6 +63,12 @@ sealed class CustomerRoutes(val route: String){
     data object WishlistScreen : CustomerRoutes("wishlist_screen")
     data object NotificationsScreen : CustomerRoutes("notifications_screen")
 
+    data object PaymentWebViewScreen : CustomerRoutes("payment_webview_screen/{url}"){
+        fun withLink(url: String): String {
+            return "payment_webview_screen/$url"
+        }
+    }
+
 
 }
 

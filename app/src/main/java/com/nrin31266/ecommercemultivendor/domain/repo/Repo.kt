@@ -36,16 +36,9 @@ import retrofit2.http.Query
 interface Repo {
     fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
     fun userLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
-//    fun sellerLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
     fun getUserProfile(): Flow<ResultState<UserDto>>
-//    fun getSellerProfile(jwt: String): Flow<ResultState<SellerDto>>
     fun sendEmailOtp(authRequest: AuthRequest): Flow<ResultState<ApiResponseNoData>>
-
     fun verifyToken(verifyTokenRequest: VerifyTokenRequest): Flow<ResultState<VerifyTokenResponse>>
-//    @Query("category") category: String? = null,
-//    @Query("sort") sort: String? = null,
-//    @Query("pageNumber") pageNumber: Int? = null,
-//    @Query("search") search: String? = null,
     fun getProducts(
     category: String? = null,
     sort: SORT_PRODUCTS? = null,
@@ -54,7 +47,6 @@ interface Repo {
     priceFilter: PRICE_FILTER? = null,
     ratingFilter: RATING_FILTER?= null
     ): Flow<ResultState<PageableDto<ProductDto>>>
-
     fun getProductDetail(id: Long): Flow<ResultState<ProductDto>>
     fun addToCart(productId: Long, subProductId: Long, request: AddUpdateCartItemRequest): Flow<ResultState<CartItemDto>>
     fun updateCartItem(cartItemId: Long, request: AddUpdateCartItemRequest): Flow<ResultState<CartItemDto>>
@@ -79,6 +71,8 @@ interface Repo {
     fun getUserWishlist(): Flow<ResultState<List<WishlistItemDto>>>
     fun addToWishlist(productId: Long): Flow<ResultState<UserWishlistProductResponse>>
     fun isUserWishlist(productId: Long): Flow<ResultState<UserWishlistProductResponse>>
+    fun getRelatedProducts(productId: Long): Flow<ResultState<List<ProductDto>>>
+
 
 
 

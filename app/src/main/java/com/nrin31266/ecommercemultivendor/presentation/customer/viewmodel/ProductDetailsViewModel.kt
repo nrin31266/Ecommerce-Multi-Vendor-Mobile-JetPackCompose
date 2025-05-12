@@ -10,6 +10,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.UserWishlistProductResponse
 import com.nrin31266.ecommercemultivendor.domain.usecase.products.GetProductDetailsUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.products.GetRelatedProductsUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.rating.GetFirstRatingUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.wishlist.AddToWishlistUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.wishlist.CheckUserWishlistUseCase
@@ -25,7 +26,8 @@ class ProductDetailsViewModel @Inject constructor(
     val getProductDetailsUseCase: GetProductDetailsUseCase,
     private val getFirstRatingUseCase: GetFirstRatingUseCase,
     private val checkUserWishlistUseCase: CheckUserWishlistUseCase,
-    private val addToWishlistUseCase: AddToWishlistUseCase
+    private val addToWishlistUseCase: AddToWishlistUseCase,
+    private val getRelatedProductsUseCase: GetRelatedProductsUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProductDetailsState())
@@ -41,6 +43,38 @@ class ProductDetailsViewModel @Inject constructor(
 
     private val _productWishlistState = MutableStateFlow(ProductWishlist())
     val productWishlistState: StateFlow<ProductWishlist> = _productWishlistState.asStateFlow()
+
+    private val _relatedProductsState = MutableStateFlow(RelatedProducts())
+    val relatedProductsState: StateFlow<RelatedProducts> = _relatedProductsState.asStateFlow()
+
+    fun getRelatedProducts(productId: Long) {
+        viewModelScope.launch {
+
+            getRelatedProductsUseCase(productId).collect {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _relatedProductsState.value =
+                            _relatedProductsState.value.copy(isLoading = true, errorMessage = null)
+                    }
+
+                    is ResultState.Success -> {
+                        _relatedProductsState.value = _relatedProductsState.value.copy(
+                            data = it.data,
+                            isLoading = false,
+                        )
+                    }
+
+                    is ResultState.Error -> {
+                        _relatedProductsState.value = _relatedProductsState.value.copy(
+                            errorMessage = it.message,
+                            isLoading = false
+                        )
+                    }
+                }
+            }
+        }
+
+    }
 
     fun addToWishlist(productId: Long) {
         if (_productWishlistState.value.isLoading) {
@@ -247,6 +281,12 @@ class ProductDetailsViewModel @Inject constructor(
     }
 
 }
+
+data class RelatedProducts(
+    var data: List<ProductDto> = emptyList(),
+    var isLoading: Boolean = false,
+    var errorMessage: String? = null,
+)
 
 data class ProductDetailsState(
     var isLoading: Boolean = false,

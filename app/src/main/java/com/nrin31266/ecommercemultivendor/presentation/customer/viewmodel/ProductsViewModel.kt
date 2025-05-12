@@ -32,7 +32,6 @@ class ProductsViewModel @Inject constructor(
     val state: StateFlow<State> = _state
 
 
-
     init {
 //        "shoes"	"shoes"
 //        ""	null
@@ -49,7 +48,7 @@ class ProductsViewModel @Inject constructor(
         getProduct()
     }
 
-    fun onSort(sort: SORT_PRODUCTS){
+    fun onSort(sort: SORT_PRODUCTS) {
         _state.value = _state.value.copy(
             sort = sort,
             products = emptyList()
@@ -67,7 +66,7 @@ class ProductsViewModel @Inject constructor(
     }
 
 
-    fun onResetFilter(){
+    fun onResetFilter() {
         _state.value = _state.value.copy(
             priceFilter = null,
             ratingFilter = null,
@@ -77,7 +76,7 @@ class ProductsViewModel @Inject constructor(
         getProduct()
     }
 
-    fun onFilter(){
+    fun onFilter() {
         _state.value = _state.value.copy(
             products = emptyList()
         )
@@ -85,7 +84,7 @@ class ProductsViewModel @Inject constructor(
         getProduct()
     }
 
-     fun onToggleRightSheet(){
+    fun onToggleRightSheet() {
         _state.value = _state.value.copy(isVisibleRightSheet = !state.value.isVisibleRightSheet)
     }
 
@@ -98,7 +97,7 @@ class ProductsViewModel @Inject constructor(
                 sort = state.value.sort,
                 priceFilter = state.value.priceFilter,
                 ratingFilter = state.value.ratingFilter
-            ).collect { rs->
+            ).collect { rs ->
                 when (rs) {
                     is ResultState.Loading -> {
                         _state.value = _state.value.copy(
@@ -111,7 +110,7 @@ class ProductsViewModel @Inject constructor(
                         _state.value = _state.value.copy(
                             isLoading = false,
                             pageNumber = 1,
-                            products = rs.data.content?: emptyList(),
+                            products = rs.data.content ?: emptyList(),
                             totalPages = rs.data.totalPages,
                             totalElements = rs.data.totalElements,
                             lastPage = rs.data.last,
@@ -130,6 +129,7 @@ class ProductsViewModel @Inject constructor(
             }
         }
     }
+
     fun loadMoreProducts() {
         Log.d("ProductsViewModel", "loadMoreProducts")
         if (state.value.isLoadMoreLoading || state.value.lastPage) return
@@ -151,6 +151,7 @@ class ProductsViewModel @Inject constructor(
                         )
 
                     }
+
                     is ResultState.Success -> {
                         _state.value = _state.value.copy(
                             pageNumber = it.data.number + 1,
@@ -162,9 +163,10 @@ class ProductsViewModel @Inject constructor(
                             size = it.data.size,
 
 
-                        )
+                            )
 
                     }
+
                     is ResultState.Error -> {
                         _state.value = _state.value.copy(
                             isLoadMoreLoading = false,
@@ -176,8 +178,9 @@ class ProductsViewModel @Inject constructor(
             }
         }
     }
+
     sealed class ProductsEvent {
-        data class ShowSnackbar(val message: String): ProductsEvent()
+        data class ShowSnackbar(val message: String) : ProductsEvent()
     }
 
 

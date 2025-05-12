@@ -44,89 +44,15 @@ import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 
 
 @Composable
-@Preview(showSystemUi = true)
+
 fun ProductItem(
     onClick: () -> Unit ={},
-    item: ProductDto = ProductDto(
-        id = 1,
-        title = "Product 1",
-        description = "Description 1",
-        minMrpPrice = 100000,
-        maxMrpPrice = 200000,
-        discountPercentage = 10,
-        minSellingPrice = 90000,
-        maxSellingPrice = 190000,
-        totalSubProduct = 10,
-        totalSold = 100,
-        totalOrder = 1000,
-        isSubProduct = true,
-        images = listOf("https://picsum.photos/200/300"),
-        numberRating = 10,
-        category = CategoryDto(
-            id = 1,
-            name = "Category 1",
-            categoryId = "1",
-            parentCategory = "12",
-            level = 3
-        ),
-        seller = SellerDto(
-            id = 1,
-            email = "william.henry.moody@my-own-personal-domain.com",
-            sellerName = "Seller 1",
-            mobile = "0123456789",
-            role = USER_ROLE.ROLE_SELLER,
-            isEmailVerified = true,
-            accountStatus = ACCOUNT_STATUS.ACTIVE
-            , taxCode = "123456789",
-            gstin = "123456789",
-            businessDetails =BusinessDetailsDto(
-                businessName = "Business 1",
-                businessEmail = "william.henry.harrison@example-pet-store.com",
-                businessMobile = "0123456789",
-                businessAddress = "Address 1",
-                logo = "https://picsum.photos/200/300",
-                banner = "https://picsum.photos/200/300"
-            ),
-
-            pickupAddress = AddressDto(
-                id = 1,
-                name = "Address 1",
-                phoneNumber = "0123456789",
-                street = "Street 1",
-                ward = "Ward 1",
-                district = "District 1",
-                province = "Province 1",
-
-
-            ),
-            bankDetails = BankDetailsDto(
-                accountNumber = "123456789",
-                accountHolderName = "Account Holder 1",
-                ifscCode = "123456789",
-                swiftCode = "123456789"
-            )
-
-
-        ),
-        createdAt = "2022-01-01",
-        optionsTypes = listOf(
-            ProductOptionTypeDto(
-                id = 1,
-                value = "Option 1"
-            ),
-            ProductOptionTypeDto(
-                id = 2,
-                value = "Option 2"
-            )
-        ),
-        optionKey = "Option Key 1",
-        subProducts = null,
-        avgRating = 4.5
-    ),
+    item: ProductDto,
+    modifier: Modifier = Modifier
 
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .padding(0.dp)
             .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),

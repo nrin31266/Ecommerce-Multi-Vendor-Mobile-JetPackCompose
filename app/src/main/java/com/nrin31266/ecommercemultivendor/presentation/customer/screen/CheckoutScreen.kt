@@ -1,5 +1,6 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
+import android.net.Uri
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -112,7 +113,13 @@ fun CheckoutScreen(
                 is CheckoutEvent.PaymentFailed -> {
                     showDialog.value = true
                 }
-                else -> {}
+                is CheckoutEvent.OpenLinkPayment->{
+                    navController.navigate(CustomerRoutes.PaymentWebViewScreen.withLink(Uri.encode(it.link)))
+
+                }
+                else -> {
+
+                }
             }
         }
     }

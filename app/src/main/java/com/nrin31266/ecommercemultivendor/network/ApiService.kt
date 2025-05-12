@@ -200,5 +200,9 @@ interface ApiService {
         @Header("Authorization") jwt: String,
         @Path("productId") productId: Long
     ): UserWishlistProductResponse
-
+    
+    @GET("products/related/{productId}")
+    suspend fun getRelatedProducts(
+        @Path("productId") productId: Long
+    ): List<ProductDto>
 }

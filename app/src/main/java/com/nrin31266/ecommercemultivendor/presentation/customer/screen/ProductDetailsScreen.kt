@@ -10,12 +10,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Badge
@@ -32,16 +38,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
+import com.nrin31266.ecommercemultivendor.presentation.components.ProductItem
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductBottomSheet
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsBottomBar
 import com.nrin31266.ecommercemultivendor.presentation.components.product.ProductDetailsContent
@@ -82,6 +93,7 @@ fun ProductDetailsScreen(
         Log.d("ProductDetailsScreen", "Product ID: $productId")
         viewModel.getProductDetails(productId.toLong())
         viewModel.getFirstRating(productId.toLong())
+        viewModel.getRelatedProducts(productId.toLong())
         if(authState.value.isLogin){
             viewModel.checkUserWishlist(productId.toLong())
         }
@@ -138,7 +150,9 @@ fun ProductDetailsScreen(
 
                 state.value.currentProduct != null -> {
                     val product = state.value.currentProduct!!
-                    LazyColumn {
+                    LazyColumn (
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ){
                         item {
                             ImagesSlider(product.images)
                             Spacer(modifier = Modifier.height(16.dp))
@@ -160,6 +174,13 @@ fun ProductDetailsScreen(
                             item {
                                 SellerCardItem(navController, product.seller!!)
                             }
+                        }
+                        item{
+                            ProductDescription(product.description)
+                        }
+
+                        item{
+                            RelatedProductsSection(navController, viewModel)
                         }
                     }
                 }
@@ -236,6 +257,85 @@ fun ProductDetailsScreen(
     if(showDialog.value){
         BasicNotification({showDialog.value = false}, addProductToCartState.value.errorMessage?:"")
     }
+}
+
+@Composable
+fun RelatedProductsSection(navController: NavController, viewModel: ProductDetailsViewModel) {
+    val relatedProductsState = viewModel.relatedProductsState.collectAsStateWithLifecycle()
+
+    Column (
+        modifier = Modifier.background(Color.White).fillMaxWidth()
+    ){
+        Row (
+            modifier = Modifier.padding(8.dp)
+        ){
+            Text("Related products", style = MaterialTheme.typography.titleMedium)
+        }
+        Divider()
+        LazyRow (
+            modifier = Modifier.padding(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ){
+            if(relatedProductsState.value.data.isNotEmpty()){
+                items(relatedProductsState.value.data){
+                    ProductItem({
+                        navController.navigate(CustomerRoutes.ProductDetailScreen.withPath(it.id))
+                    }, it, modifier = Modifier.width(165.dp))
+                }
+            }else{
+               item {
+                   Text("Not related products yet")
+               }
+            }
+
+        }
+    }
+
+}
+
+
+@Composable
+fun ProductDescription(description: String) {
+
+    val showMore = rememberSaveable(description) { mutableStateOf(false) }
+
+
+    Column (
+        modifier = Modifier.background(Color.White).fillMaxWidth()
+    ){
+        Row (modifier = Modifier.padding(8.dp)){
+            Text("Description", style = MaterialTheme.typography.titleMedium)
+        }
+        Divider()
+        Column(
+            modifier = Modifier.padding(8.dp)
+        ) {
+           Text(if (description.length < 200) description else if (showMore.value) description else description.substring(0, 200) + "..."
+           , fontSize = 15.sp)
+
+        }
+        Divider()
+        if(description.length>=200){
+            Row (modifier = Modifier.fillMaxWidth().padding(8.dp).clickable {
+                showMore.value = !showMore.value
+            },
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically){
+                var text = ""
+                var icon: ImageVector
+                if(showMore.value){
+                    text = "Show less"
+                    icon = Icons.Default.KeyboardArrowUp
+                }else{
+                    text = "Show more"
+                    icon = Icons.Default.KeyboardArrowDown
+                }
+                Text(text, textAlign = TextAlign.Center, color = Color.Gray)
+                Icon(icon, "des",)
+            }
+        }
+    }
+
 }
 
 @Composable

@@ -1,6 +1,7 @@
 package com.nrin31266.ecommercemultivendor.presentation.nav
 
 
+import android.content.Context
 import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
@@ -56,6 +57,7 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.HomeScree
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.LoginScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.NotificationsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.PaymentScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductDetailsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
@@ -85,6 +87,17 @@ fun App() {
     val currentRoute = navBackStackEntry?.destination?.route
     val isShowBottomBar = remember { mutableStateOf(false) }
 
+    LaunchedEffect(Unit) {
+        val prefs = context.getSharedPreferences("vnpay", Context.MODE_PRIVATE)
+        val hasPendingResult = prefs.getBoolean("payment_result_pending", false)
+
+        if (hasPendingResult) {
+            val success = prefs.getBoolean("payment_success", false)
+            prefs.edit().clear().apply() // xoá cờ sau khi xử lý
+
+            navController.navigate(CustomerRoutes.PurchasedScreen.withPath(if (success) 1 else 0))
+        }
+    }
 
     LaunchedEffect(currentRoute) {
         isShowBottomBar.value = when (currentRoute) {
@@ -313,6 +326,15 @@ fun App() {
                         NotificationsScreen(
                             navController
                         )
+                    }
+                    composable(
+                        route = CustomerRoutes.PaymentWebViewScreen.route,
+                        arguments = listOf(navArgument("url") { type = NavType.StringType })
+                    ) { backStackEntry ->
+                        val url = backStackEntry.arguments?.getString("url")
+                        if (url != null) {
+                            PaymentScreen(vnpayUrl = url, navController = navController)
+                        }
                     }
 
 

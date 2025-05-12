@@ -38,7 +38,7 @@ fun SellerCardItem(navigation: NavController, seller: SellerDto) {
     }
 
     Row(
-        modifier = Modifier.padding(8.dp).fillMaxWidth(),
+        modifier = Modifier.background(Color.White).padding(8.dp).fillMaxWidth(),
         verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
     ) {
         Row(
