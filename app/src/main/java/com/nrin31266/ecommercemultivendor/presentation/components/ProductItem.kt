@@ -170,7 +170,7 @@ fun ProductItem(
                         text = CurrencyConverter.toVND(item.minSellingPrice) ,
                         style = MaterialTheme.typography.bodyMedium,
                         fontWeight = FontWeight.SemiBold,
-                        color = colorResource(R.color.elegant_gold),
+                        color = MaterialTheme.colorScheme.primary,
                         overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.weight(1f),
                         maxLines = 1

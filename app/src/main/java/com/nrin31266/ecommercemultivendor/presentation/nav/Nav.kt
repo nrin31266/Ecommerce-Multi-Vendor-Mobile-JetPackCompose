@@ -60,6 +60,9 @@ sealed class CustomerRoutes(val route: String){
         }
     }
 
+    data object WishlistScreen : CustomerRoutes("wishlist_screen")
+    data object NotificationsScreen : CustomerRoutes("notifications_screen")
+
 
 }
 

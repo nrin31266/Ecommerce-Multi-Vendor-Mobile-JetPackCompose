@@ -1,9 +1,9 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
 
-import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,6 +18,8 @@ import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -27,7 +29,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -72,6 +73,8 @@ fun ProductDetailsScreen(
 
     val showDialog = remember { mutableStateOf(false) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
+
     LaunchedEffect(Unit) {
         navController.currentBackStackEntry?.destination?.route?.let {
             Log.d("NavController", "Current route: $it")
@@ -79,6 +82,11 @@ fun ProductDetailsScreen(
         Log.d("ProductDetailsScreen", "Product ID: $productId")
         viewModel.getProductDetails(productId.toLong())
         viewModel.getFirstRating(productId.toLong())
+        if(authState.value.isLogin){
+            viewModel.checkUserWishlist(productId.toLong())
+        }
+
+
 
         cartViewModel.addProductToCartEventFlow.collectLatest {
             when(it){
@@ -101,7 +109,7 @@ fun ProductDetailsScreen(
         skipPartiallyExpanded = true,        // <<— nếu bạn muốn bỏ qua trạng thái nửa màn hình,
 //        confirmValueChange = { it != SheetValue.Hidden }
     )
-    val authState = authViewModel.userAuthState.collectAsStateWithLifecycle()
+
     val cartInfoState = cartViewModel.cartInfoState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
 
@@ -136,11 +144,11 @@ fun ProductDetailsScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                         }
                         item {
-                            ProductDetailsContent(product, state.value.favCurrentProduct)
+                            ProductDetailsContent(navController, authViewModel, viewModel)
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                         item {
-                            androidx.compose.material.Divider()
+                            Divider()
                             Spacer(modifier = Modifier.height(8.dp))
                         }
                         item {
@@ -167,12 +175,21 @@ fun ProductDetailsScreen(
                     .align(Alignment.TopCenter)
                     .background(Color.Transparent),
                 customAction = {
-                    IconButtonWithBadge(
-                        onClick = {navController.navigate(CustomerRoutes.CartScreen.route)},
-                        icon = Icons.Default.ShoppingCart,
-                        badgeCount = cartInfoState.value.totalItem,
-                        contentDescription = "Cart"
-                    )
+                    BadgedBox(modifier = Modifier.clickable {
+                        if(authState.value.isLogin){
+                            navController.navigate(CustomerRoutes.CartScreen.route)
+                        }else{
+                            navController.navigate(CustomerRoutes.CustomerLoginScreen.route)
+                        }
+                    }.padding(8.dp),badge = {
+                        if (cartInfoState.value.totalCartItem>0) {
+                            Badge{
+                                Text(cartInfoState.value.totalCartItem.toString())
+                            }
+                        }
+                    }) {
+                        Icon(Icons.Default.ShoppingCart, "Spc")
+                    }
                 }
             )
         }
@@ -195,7 +212,7 @@ fun ProductDetailsScreen(
             { type, value ->
                 viewModel.updateSelectedOption(type, value)
             },
-            currentSubProduct = state.value.currentSubProductDto,
+            currentSubProduct = state.value.currentSubProduct,
             optionState.value.mapKeySubProductImages,
             optionState.value.mapSubProducts,
             optionState.value.mapKeyToOptionMap,
@@ -209,7 +226,7 @@ fun ProductDetailsScreen(
             addProductToCartState.value.errorMessage,
             onAddToCartClick = {
                 cartViewModel.addProductToCart(state.value.currentProduct?.id!!,
-                    state.value.currentSubProductDto?.id!!,
+                    state.value.currentSubProduct?.id!!,
                     AddUpdateCartItemRequest(state.value.quantity))
             },
             snackbarHostState

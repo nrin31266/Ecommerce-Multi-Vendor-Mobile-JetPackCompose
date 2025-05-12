@@ -1,22 +1,21 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel
 
-import androidx.compose.runtime.mutableStateMapOf
+import android.content.ContentValues.TAG
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SubProductDto
-import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
-import com.nrin31266.ecommercemultivendor.domain.usecase.cart.AddProductToCartUseCase
+import com.nrin31266.ecommercemultivendor.domain.dto.response.UserWishlistProductResponse
 import com.nrin31266.ecommercemultivendor.domain.usecase.products.GetProductDetailsUseCase
-import com.nrin31266.ecommercemultivendor.domain.usecase.rating.AddRatingUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.rating.GetFirstRatingUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.wishlist.AddToWishlistUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.wishlist.CheckUserWishlistUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,7 +23,9 @@ import javax.inject.Inject
 @HiltViewModel
 class ProductDetailsViewModel @Inject constructor(
     val getProductDetailsUseCase: GetProductDetailsUseCase,
-    private val getFirstRatingUseCase: GetFirstRatingUseCase
+    private val getFirstRatingUseCase: GetFirstRatingUseCase,
+    private val checkUserWishlistUseCase: CheckUserWishlistUseCase,
+    private val addToWishlistUseCase: AddToWishlistUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProductDetailsState())
@@ -37,6 +38,70 @@ class ProductDetailsViewModel @Inject constructor(
 
     private val _productRatingState = MutableStateFlow(ProductDetailsRating())
     val productRatingState: StateFlow<ProductDetailsRating> = _productRatingState.asStateFlow()
+
+    private val _productWishlistState = MutableStateFlow(ProductWishlist())
+    val productWishlistState: StateFlow<ProductWishlist> = _productWishlistState.asStateFlow()
+
+    fun addToWishlist(productId: Long) {
+        if (_productWishlistState.value.isLoading) {
+            return
+        }
+        viewModelScope.launch {
+            addToWishlistUseCase(productId).collect {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _productWishlistState.value =
+                            _productWishlistState.value.copy(isLoading = true, errorMessage = null)
+                    }
+
+                    is ResultState.Success -> {
+                        _productWishlistState.value = _productWishlistState.value.copy(
+                            data = it.data,
+                            isLoading = false,
+                        )
+                    }
+
+                    is ResultState.Error -> {
+                        _productWishlistState.value =
+                            _productWishlistState.value.copy(
+                                errorMessage = it.message,
+                            )
+                    }
+
+                }
+
+            }
+        }
+
+    }
+
+    fun checkUserWishlist(productId: Long) {
+        viewModelScope.launch {
+            checkUserWishlistUseCase(productId).collect {
+                when (it) {
+                    is ResultState.Loading -> {
+                        _productWishlistState.value =
+                            _productWishlistState.value.copy(isLoading = true, errorMessage = null)
+                    }
+
+                    is ResultState.Success -> {
+                        _productWishlistState.value = _productWishlistState.value.copy(
+                            data = it.data,
+                            isLoading = false,
+                        )
+                    }
+
+                    is ResultState.Error -> {
+                        Log.d(TAG, "checkUserWishlist: ${it.message}")
+                        _productWishlistState.value =
+                            _productWishlistState.value.copy(
+                                errorMessage = it.message,
+                            )
+                    }
+                }
+            }
+        }
+    }
 
 
     fun getFirstRating(productId: Long) {
@@ -107,7 +172,7 @@ class ProductDetailsViewModel @Inject constructor(
             )
         }
         _state.value =
-            _state.value.copy(currentSubProductDto = findMatchingSubProduct(_productOptionState.value.selectedOptions))
+            _state.value.copy(currentSubProduct = findMatchingSubProduct(_productOptionState.value.selectedOptions))
     }
 
     fun updateQuantity(quantity: Int) {
@@ -120,7 +185,7 @@ class ProductDetailsViewModel @Inject constructor(
 
     private fun clearOptionStates() {
         _productOptionState.value = ProductOptionState()
-        _state.value = _state.value.copy(currentSubProductDto = null)
+        _state.value = _state.value.copy(currentSubProduct = null)
     }
 
     private fun buildOptionsFromProduct(product: ProductDto?) {
@@ -164,7 +229,7 @@ class ProductDetailsViewModel @Inject constructor(
                 mapKeySubProductImages = newMapKeySubProductImages
             )
         } else if (product != null && product.isSubProduct) {
-            _state.value = _state.value.copy(currentSubProductDto = product.subProducts?.get(0))
+            _state.value = _state.value.copy(currentSubProduct = product.subProducts?.get(0))
         }
     }
 
@@ -190,11 +255,17 @@ data class ProductDetailsState(
     var favCurrentProduct: Boolean = true,
     var quantity: Int = 1,
     var isOpenSheetBottom: Boolean = false,
-    var currentSubProductDto: SubProductDto? = null,
+    var currentSubProduct: SubProductDto? = null,
 )
 
 data class ProductDetailsRating(
     var data: List<ReviewDto>? = null,
+    var isLoading: Boolean = false,
+    var errorMessage: String? = null,
+)
+
+data class ProductWishlist(
+    var data: UserWishlistProductResponse? = null,
     var isLoading: Boolean = false,
     var errorMessage: String? = null,
 )

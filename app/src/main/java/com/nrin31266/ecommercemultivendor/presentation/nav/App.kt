@@ -54,12 +54,14 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CartScree
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.CheckoutScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.HomeScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.LoginScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.NotificationsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductDetailsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SellerOrderDetailsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.WishlistScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.purchased_screen.PurchasedScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.AuthViewModel
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.CartViewModel
@@ -86,7 +88,8 @@ fun App() {
 
     LaunchedEffect(currentRoute) {
         isShowBottomBar.value = when (currentRoute) {
-            CustomerRoutes.CustomerHomeScreen.route, CustomerRoutes.CustomerAccountScreen.route, CustomerRoutes.CustomerOrdersScreen.route -> true
+            CustomerRoutes.CustomerHomeScreen.route, CustomerRoutes.CustomerAccountScreen.route, CustomerRoutes.WishlistScreen.route ,
+                CustomerRoutes.NotificationsScreen.route-> true
             else -> false
         }
     }
@@ -104,7 +107,7 @@ fun App() {
             Log.d("App", "Not logged in");
         }
     }
-    val customerBottomItems = BottomNavItemsProvider.getCustomerBottomItems();
+
 
     val isLoggedIn = authViewModel.userAuthState.collectAsStateWithLifecycle().value.isLogin
     LaunchedEffect(isLoggedIn) {
@@ -118,6 +121,7 @@ fun App() {
 
         } else {
             Log.d("App", "Remove user cart");
+            cartViewModel.clearCart()
             Log.d("App", "Remove user profile");
         }
     }
@@ -136,7 +140,7 @@ fun App() {
     Scaffold(
         bottomBar = {
             if (isShowBottomBar.value) {
-                CustomAnimatedBottomBar(navController, currentRoute, customerBottomItems)
+                BottomBarNav(navController)
             }
         },
         modifier = Modifier
@@ -159,7 +163,7 @@ fun App() {
                         HomeScreen(navController, authViewModel, cartViewModel, homeViewModel)
                     }
                     composable(CustomerRoutes.CustomerAccountScreen.route) {
-                        AccountScreen(navController, authViewModel)
+                        AccountScreen(navController, authViewModel, profileViewModel, cartViewModel)
                     }
                     composable(CustomerRoutes.CustomerOrdersScreen.route) {
                         OrdersScreen(navController)
@@ -299,6 +303,17 @@ fun App() {
                             orderId
                         )
                     }
+                    composable(CustomerRoutes.WishlistScreen.route) {
+                        WishlistScreen(
+                            navController,
+                            authViewModel = authViewModel
+                        )
+                    }
+                    composable(CustomerRoutes.NotificationsScreen.route) {
+                        NotificationsScreen(
+                            navController
+                        )
+                    }
 
 
                 }
@@ -311,87 +326,3 @@ fun App() {
 
 }
 
-data class BottomNavItem(
-    val name: String,
-    val icon: ImageVector,
-    val unSelectedIcon: ImageVector,
-    val route: String
-)
-
-@Composable
-fun CustomAnimatedBottomBar(
-    navController: NavController,
-    currentRoute: String?,
-    bottomNavItems: List<BottomNavItem>
-) {
-    AnimatedBottomBar(
-        selectedItem = bottomNavItems.indexOfFirst { it.route == currentRoute },
-        itemSize = bottomNavItems.size,
-        containerColor = Color.Transparent,
-        indicatorColor = colorResource(id = R.color.elegant_gold),
-        indicatorDirection = IndicatorDirection.BOTTOM,
-        indicatorStyle = IndicatorStyle.WORM,
-        modifier = Modifier.padding(
-            bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-        ),
-
-//        bottomBarHeight = 55.dp,
-
-        indicatorHeight = 3.dp,
-
-
-        ) {
-        bottomNavItems.forEach { item ->
-            BottomBarItem(
-                selected = item.route == currentRoute,
-                onClick = {
-                    if (currentRoute != item.route) {
-                        navController.navigate(item.route) {
-                            popUpTo(0) { inclusive = false }
-                            launchSingleTop = true
-                        }
-                    }
-                },
-                label = item.name,
-                imageVector = if (item.route == currentRoute) item.icon else item.unSelectedIcon,
-                containerColor = Color.Transparent,
-                textColor = MaterialTheme.colorScheme.primary,
-
-                itemStyle = ItemStyle.STYLE4,
-                iconColor = if (item.route == currentRoute)
-                    colorResource(id = R.color.elegant_gold)
-                else colorResource(id = R.color.dark_slate),
-                visibleItem = VisibleItem.ICON
-
-
-            )
-        }
-    }
-}
-
-object BottomNavItemsProvider {
-
-    fun getCustomerBottomItems() = listOf(
-        BottomNavItem(
-            "Home",
-            Icons.Filled.Home,
-            Icons.Outlined.Home,
-            CustomerRoutes.CustomerHomeScreen.route
-        ),
-        BottomNavItem(
-            "Orders",
-            Icons.Filled.List,
-            Icons.Outlined.List,
-            CustomerRoutes.CustomerOrdersScreen.route
-        ),
-        BottomNavItem(
-            "Account",
-            Icons.Filled.Person,
-            Icons.Outlined.Person,
-            CustomerRoutes.CustomerAccountScreen.route
-        )
-
-    )
-
-
-}

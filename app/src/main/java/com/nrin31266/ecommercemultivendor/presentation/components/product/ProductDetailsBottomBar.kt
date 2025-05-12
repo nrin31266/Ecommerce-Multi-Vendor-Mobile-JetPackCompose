@@ -54,7 +54,7 @@ fun ProductDetailsBottomBar(product: ProductDto, onAddToCartClick: () -> Unit = 
         Column(
             modifier = Modifier
                 .weight(1f)
-                .background(colorResource(R.color.elegant_gold))
+                .background(MaterialTheme.colorScheme.primary)
                 .fillMaxSize()
                 .clickable { onAddToCartClick() },
             verticalArrangement = Arrangement.Center,

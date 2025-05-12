@@ -46,7 +46,7 @@ package com.nrin31266.ecommercemultivendor.domain.dto
 //    images.clear();
 //}
 data class ProductDto(
-    var id : Long? = null,
+    var id : Long,
     var title : String = "",
     var description : String = "",
     var minMrpPrice : Long = 0L,

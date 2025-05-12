@@ -206,7 +206,7 @@ fun ProductBottomSheet(
                                         maxLines = 1,
                                         style = MaterialTheme.typography.bodyMedium,
                                         fontWeight = FontWeight.Bold,
-                                        color = colorResource(R.color.elegant_gold)
+                                        color = MaterialTheme.colorScheme.primary
                                     )
 
                                     if (currentSubProduct?.mrpPrice != null) {
@@ -282,7 +282,7 @@ fun ProductBottomSheet(
                                 .height(44.dp),
                             shape = RoundedCornerShape(4.dp),
                             colors = ButtonDefaults.buttonColors(
-                                colorResource(R.color.elegant_gold)
+                                MaterialTheme.colorScheme.primary
 
                             ),
                             enabled =
@@ -464,7 +464,7 @@ fun ProductBottomSheet(
                                             style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.SemiBold,
                                             modifier = Modifier.padding(horizontal = 24.dp),
-                                            color = colorResource(R.color.elegant_gold)
+                                            color = MaterialTheme.colorScheme.primary
                                         )
 
                                         Box(

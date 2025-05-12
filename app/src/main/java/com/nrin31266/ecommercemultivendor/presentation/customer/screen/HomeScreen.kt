@@ -1,5 +1,6 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,10 +10,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.nrin31266.ecommercemultivendor.presentation.components.home.HomeCategorySection
@@ -50,12 +57,31 @@ fun HomeScreen(
                    }, modifier = Modifier.weight(1f))
                }
            }, customAction = {
-               IconButtonWithBadge(
-                   onClick = {navController.navigate(CustomerRoutes.CartScreen.route)},
-                   icon = Icons.Default.ShoppingCart,
-                   badgeCount = cartInfoState.value.totalItem,
-                   contentDescription = "Cart"
-               )
+
+                   BadgedBox(modifier = Modifier.clickable {
+                       if(authState.value.isLogin){
+                           navController.navigate(CustomerRoutes.CartScreen.route)
+                       }else{
+                           navController.navigate(CustomerRoutes.CustomerLoginScreen.route)
+                       }
+                   }.padding(8.dp),badge = {
+                       if (cartInfoState.value.totalCartItem>0) {
+                           Badge{
+                               Text(cartInfoState.value.totalCartItem.toString())
+                           }
+                       }
+                   }) {
+                       Icon(Icons.Default.ShoppingCart, "Spc")
+                   }
+
+
+
+//               IconButtonWithBadge(
+//                   onClick = {navController.navigate(CustomerRoutes.CartScreen.route)},
+//                   icon = Icons.Default.ShoppingCart,
+//                   badgeCount = cartInfoState.value.totalItem,
+//                   contentDescription = "Cart"
+//               )
            }
 
            )
@@ -90,12 +116,12 @@ fun HomeScreen(
                 HomeCategorySection(homeState.value.homeCategory.homeFurniture, "Home Furniture", navController)
             }
 
-            item{
-                CustomMessageBox(
-                    message = authState.value.jwt?:"Not logged in",
-                    MessageType.ERROR
-                )
-            }
+//            item{
+//                CustomMessageBox(
+//                    message = authState.value.jwt?:"Not logged in",
+//                    MessageType.ERROR
+//                )
+//            }
         }
     }
 

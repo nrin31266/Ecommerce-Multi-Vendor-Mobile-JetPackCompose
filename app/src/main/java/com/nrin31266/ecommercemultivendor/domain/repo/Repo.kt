@@ -16,6 +16,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
+import com.nrin31266.ecommercemultivendor.domain.dto.WishlistItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateOrderRequest
@@ -27,6 +28,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.HomeCategoryResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PaymentResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.UserWishlistProductResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import kotlinx.coroutines.flow.Flow
 import retrofit2.http.Query
@@ -74,6 +76,9 @@ interface Repo {
     fun getOrderItem(orderItem: Long): Flow<ResultState<OrderItemDto>>
     fun getHomeCategories(): Flow<ResultState<HomeCategoryResponse>>
     fun getHomeBanners(): Flow<ResultState<List<BannerDto>>>
+    fun getUserWishlist(): Flow<ResultState<List<WishlistItemDto>>>
+    fun addToWishlist(productId: Long): Flow<ResultState<UserWishlistProductResponse>>
+    fun isUserWishlist(productId: Long): Flow<ResultState<UserWishlistProductResponse>>
 
 
 

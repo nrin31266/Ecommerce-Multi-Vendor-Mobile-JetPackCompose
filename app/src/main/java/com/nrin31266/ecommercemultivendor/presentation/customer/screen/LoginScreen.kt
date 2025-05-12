@@ -69,12 +69,18 @@ fun LoginScreen(
         authViewModel.authEvent.collect { event ->
             when (event) {
                 is AuthEvent.NavigateToHome -> {
-                    navController.navigate(redirect ?: CustomerRoutes.CustomerHomeScreen.route) {
-
-
-                        popUpTo(CustomerRoutes.CustomerLoginScreen.route) { inclusive = true }
-                        popUpTo(CustomerRoutes.ProductDetailScreen.route) { inclusive = true }
+                    if (redirect == null) {
+                        navController.navigate(CustomerRoutes.CustomerHomeScreen.route) {
+                            popUpTo(0) { inclusive = true }
+                        }
+                    } else {
+                        navController.navigate(redirect) {
+                            popUpTo(CustomerRoutes.CustomerLoginScreen.route) { inclusive = true }
+                            popUpTo(CustomerRoutes.ProductDetailScreen.route) { inclusive = true }
+                        }
                     }
+
+
 
 
                 }

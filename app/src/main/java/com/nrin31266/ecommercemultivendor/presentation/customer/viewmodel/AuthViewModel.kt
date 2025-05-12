@@ -145,8 +145,13 @@ class AuthViewModel @Inject constructor(
             authPreferences.clearAuth()
             _userAuthState.value = _userAuthState.value.copy(
                 jwt = null,
-                isLogin = false
+                isLogin = false,
+                isInitLoading = false,
+                isInitErrorMessage = null,
+                timeLeft = 0,
+                isSentOtp = false
             )
+
         }
     }
     private var countdownJob: Job? = null

@@ -1,6 +1,5 @@
 package com.nrin31266.ecommercemultivendor.network
 
-import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.PRICE_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
@@ -12,22 +11,21 @@ import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
-import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
+import com.nrin31266.ecommercemultivendor.domain.dto.WishlistItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateOrderRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateReviewRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
-import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.HomeCategoryResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PaymentResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.UserWishlistProductResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
-import kotlinx.coroutines.flow.Flow
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -186,5 +184,21 @@ interface ApiService {
 
     @GET("home/banners")
     suspend fun getHomeBanners(): List<BannerDto>
+
+    @GET("api/wishlist/user")
+    suspend fun getUserWishlist(
+        @Header("Authorization") jwt: String
+    ): List<WishlistItemDto>
+
+    @POST("api/wishlist/user/{productId}")
+    suspend fun addToWishlist(
+        @Header("Authorization") jwt: String,
+        @Path("productId") productId: Long
+    ): UserWishlistProductResponse
+    @POST("api/wishlist/user/check/{productId}")
+    suspend fun checkWishlist(
+        @Header("Authorization") jwt: String,
+        @Path("productId") productId: Long
+    ): UserWishlistProductResponse
 
 }

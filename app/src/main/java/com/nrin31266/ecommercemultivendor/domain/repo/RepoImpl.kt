@@ -10,7 +10,6 @@ import com.nrin31266.ecommercemultivendor.common.constant.RATING_FILTER
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
 import com.nrin31266.ecommercemultivendor.common.constant.SORT_PRODUCTS
 import com.nrin31266.ecommercemultivendor.common.toReadableError
-
 import com.nrin31266.ecommercemultivendor.domain.dto.AddressDto
 import com.nrin31266.ecommercemultivendor.domain.dto.BannerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
@@ -18,23 +17,22 @@ import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
-import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
+import com.nrin31266.ecommercemultivendor.domain.dto.WishlistItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AddUpdateCartItemRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.AuthRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateOrderRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.CreateReviewRequest
 import com.nrin31266.ecommercemultivendor.domain.dto.request.VerifyTokenRequest
-import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.ApiResponseNoData
 import com.nrin31266.ecommercemultivendor.domain.dto.response.AuthResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.HomeCategoryResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PageableDto
 import com.nrin31266.ecommercemultivendor.domain.dto.response.PaymentResponse
+import com.nrin31266.ecommercemultivendor.domain.dto.response.UserWishlistProductResponse
 import com.nrin31266.ecommercemultivendor.domain.dto.response.VerifyTokenResponse
 import com.nrin31266.ecommercemultivendor.network.ApiService
-import com.squareup.moshi.JsonDataException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
@@ -42,7 +40,6 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.suspendCancellableCoroutine
 import retrofit2.HttpException
-import java.io.IOException
 import javax.inject.Inject
 import kotlin.coroutines.resumeWithException
 
@@ -223,6 +220,21 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
     override fun getHomeBanners(): Flow<ResultState<List<BannerDto>>> = flow {
         emit(ResultState.Loading)
         emit(makeApiCall { apiService.getHomeBanners() })
+    }.flowOn(Dispatchers.IO)
+
+    override fun getUserWishlist(): Flow<ResultState<List<WishlistItemDto>>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.getUserWishlist(getBearerToken()) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun addToWishlist(productId: Long): Flow<ResultState<UserWishlistProductResponse>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.addToWishlist(getBearerToken(), productId) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun isUserWishlist(productId: Long): Flow<ResultState<UserWishlistProductResponse>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.checkWishlist(getBearerToken(), productId) })
     }.flowOn(Dispatchers.IO)
 
     private suspend fun getBearerToken(): String {

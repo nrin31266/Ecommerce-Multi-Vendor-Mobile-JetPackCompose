@@ -95,7 +95,6 @@ fun ProductsScreen(
 
     LaunchedEffect(Unit) {
         Log.d("ProductsScreen", "Query: $search, Category: $category, Sort: $sort")
-//        viewModel.getProduct(search, category, sort)
     }
 
     // Theo dõi động vị trí cuộn, trigger loadMore mỗi khi cuối danh sách
@@ -112,6 +111,7 @@ fun ProductsScreen(
                     && !state.value.lastPage
                     && !state.value.isLoadMoreLoading
                 ) {
+                    Log.d("ProductsScreen", "Load more product")
                     viewModel.loadMoreProducts()
                 }
             }

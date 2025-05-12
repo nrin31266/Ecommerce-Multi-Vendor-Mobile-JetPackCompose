@@ -12,9 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Text
+import androidx.compose.material3.Text
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,11 +64,11 @@ fun SellerCardItem(navigation: NavController, seller: SellerDto) {
         Column {
             OutlinedButton({},
                 shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, color = colorResource(R.color.elegant_gold)),
+                border = androidx.compose.foundation.BorderStroke(1.dp, color = MaterialTheme.colorScheme.primary),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                 modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
             ) {
-                Text("See All", color = colorResource(R.color.elegant_gold), fontSize = 14.sp)
+                Text("See All", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
             }
         }
     }

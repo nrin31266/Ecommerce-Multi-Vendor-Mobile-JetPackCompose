@@ -96,11 +96,19 @@ fun CheckoutScreen(
                 is CheckoutEvent.PaymentSuccess -> {
                     cartViewModel.clearCart()
 
-                    navController.navigate(CustomerRoutes.CustomerHomeScreen.route) {
-                        popUpTo(0) { inclusive = false }
+                    // Đảm bảo HomeScreen đã có trong back stack
+                    navController.navigate(CustomerRoutes.CustomerAccountScreen.route) {
+                        popUpTo(0) { inclusive = false } // hoặc dùng startDestinationId
+                        launchSingleTop = true
+                    }
+
+                    // Sau đó chuyển tới PurchasedScreen và pop hết về Home
+                    navController.navigate(CustomerRoutes.PurchasedScreen.withPath(1)) {
+                        popUpTo(CustomerRoutes.CustomerHomeScreen.route) { inclusive = false }
                         launchSingleTop = true
                     }
                 }
+
                 is CheckoutEvent.PaymentFailed -> {
                     showDialog.value = true
                 }
