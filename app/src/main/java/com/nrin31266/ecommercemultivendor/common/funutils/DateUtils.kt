@@ -2,6 +2,9 @@ package com.nrin31266.ecommercemultivendor.common.funutils
 
 import java.text.SimpleDateFormat
 import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Date
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -49,6 +52,16 @@ object DateUtils {
         } catch (e: Exception) {
             e.printStackTrace()
             Date() // fallback nếu parse lỗi
+        }
+    }
+    fun convertVNTime(isoString: String): String {
+        return try {
+            val zonedDateTime = ZonedDateTime.parse(isoString)
+                .withZoneSameInstant(ZoneId.of("Asia/Ho_Chi_Minh"))
+            val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
+            zonedDateTime.format(formatter)
+        } catch (e: Exception) {
+            "Invalid date"
         }
     }
 }

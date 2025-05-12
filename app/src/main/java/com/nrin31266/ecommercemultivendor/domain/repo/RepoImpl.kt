@@ -15,6 +15,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.BannerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
+import com.nrin31266.ecommercemultivendor.domain.dto.PaymentDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
@@ -240,6 +241,16 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
     override fun getRelatedProducts(productId: Long): Flow<ResultState<List<ProductDto>>> = flow {
         emit(ResultState.Loading)
         emit(makeApiCall { apiService.getRelatedProducts(productId) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun userPendingPayment(): Flow<ResultState<List<PaymentDto>>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.userPendingPayment(getBearerToken()) })
+    }.flowOn(Dispatchers.IO)
+
+    override fun userCancelPayment(paymentId: Long): Flow<ResultState<PaymentDto>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.userCancelPayment(getBearerToken(), paymentId) })
     }.flowOn(Dispatchers.IO)
 
     private suspend fun getBearerToken(): String {

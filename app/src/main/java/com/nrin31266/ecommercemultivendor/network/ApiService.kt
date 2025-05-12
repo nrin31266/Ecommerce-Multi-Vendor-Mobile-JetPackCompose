@@ -9,6 +9,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.BannerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartDto
 import com.nrin31266.ecommercemultivendor.domain.dto.CartItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
+import com.nrin31266.ecommercemultivendor.domain.dto.PaymentDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
@@ -205,4 +206,15 @@ interface ApiService {
     suspend fun getRelatedProducts(
         @Path("productId") productId: Long
     ): List<ProductDto>
+
+    @GET("api/payment/pending-payment")
+    suspend fun userPendingPayment(
+        @Header("Authorization") jwt: String
+    ): List<PaymentDto>
+
+    @PUT("api/payment/cancel/{paymentId}")
+    suspend fun userCancelPayment(
+        @Header("Authorization") jwt: String,
+        @Path("paymentId") paymentId: Long
+    ): PaymentDto
 }

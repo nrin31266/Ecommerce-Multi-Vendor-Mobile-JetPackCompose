@@ -1,18 +1,17 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.nrin31266.ecommercemultivendor.common.ResultState
 import com.nrin31266.ecommercemultivendor.common.constant.SELLER_ORDER_STATUS
-import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
+import com.nrin31266.ecommercemultivendor.domain.dto.PaymentDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
+import com.nrin31266.ecommercemultivendor.domain.usecase.payment.CancelPaymentUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.payment.GetUserOrdersUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.payment.GetUserPendingPaymentsUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.purchased.UserCancelSellerOrderUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.purchased.UserConfirmSellerOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -20,16 +19,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.math.log
 
 @HiltViewModel
 class PurchasedViewModel @Inject constructor(
     private val getUserOrdersUseCase: GetUserOrdersUseCase,
     private val userCancelSellerOrderUseCase: UserCancelSellerOrderUseCase,
-    private val userConfirmSellerOrderUseCase: UserConfirmSellerOrderUseCase
+    private val userConfirmSellerOrderUseCase: UserConfirmSellerOrderUseCase,
+    private val getUserPendingPaymentsUseCase: GetUserPendingPaymentsUseCase,
+    private  val userCancelPaymentUseCase: CancelPaymentUseCase
 ) : ViewModel() {
     private val _purchasedState = MutableStateFlow(PurchasedState())
     val purchasedState = _purchasedState.asStateFlow()
@@ -51,7 +50,60 @@ class PurchasedViewModel @Inject constructor(
 
     fun selectTab(tabIndex: Int) {
         _purchasedState.value = _purchasedState.value.copy(tabIndex = tabIndex)
+    }
 
+    fun userCancelPayment(paymentId: Long){
+        viewModelScope.launch {
+            userCancelPaymentUseCase(paymentId).collect{
+                when(it){
+                    is ResultState.Loading -> {
+
+                    }
+                    is ResultState.Success -> {
+
+                            _toPayState.value = _toPayState.value.copy(toPayList =
+                        _toPayState.value.toPayList?.filter { it.id != paymentId })
+                        val sellerOrders = it.data.order.sellerOrders
+                        if (sellerOrders.isNotEmpty()) {
+                            if(_cancelledState.value.cancelledList == null){
+                                cancelAction()
+                            }else{
+                                val newCancelledList: List<SellerOrderDto> =
+                                    sellerOrders + cancelledState.value.cancelledList!!
+                                _cancelledState.value =
+                                    _cancelledState.value.copy(cancelledList = newCancelledList)
+                            }
+                        }
+                        _eventFlow.emit(PurchasedEvent.PopToTab(5))
+                    }
+                    is ResultState.Error -> {
+
+                    }
+
+
+                }
+            }
+        }
+    }
+
+    fun getUserPendingPayments(){
+        viewModelScope.launch {
+            getUserPendingPaymentsUseCase().collect{
+                when(it){
+                    is ResultState.Loading -> {
+                        _toPayState.value = _toPayState.value.copy(isLoading = true)
+                    }
+                    is ResultState.Success -> {
+                        _toPayState.value = _toPayState.value.copy(isLoading = false,
+                            toPayList = it.data)
+                    }
+                    is ResultState.Error -> {
+                        _toPayState.value = _toPayState.value.copy(isLoading = false,
+                            errorMessage = it.message)
+                    }
+                }
+            }
+        }
     }
 
     fun shippingAction() {
@@ -276,7 +328,7 @@ data class PurchasedState(
 data class ToPayState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
-    val toPayList: List<Any> = emptyList()
+    val toPayList: List<PaymentDto>? = null
 )
 
 data class ToConfirmState(

@@ -39,7 +39,7 @@ fun PurchasedScreen(
     val shippingState = purchasedViewModel.shippingState.collectAsStateWithLifecycle()
     val deliveredState = purchasedViewModel.deliveredState.collectAsStateWithLifecycle()
     val cancelledState = purchasedViewModel.cancelledState.collectAsStateWithLifecycle()
-
+    val toPayState = purchasedViewModel.toPayState.collectAsStateWithLifecycle()
     val tabs = listOf("To pay", "To confirm", "To pickup", "Shipping", "Delivered", "Cancelled")
 
     val pagerState = rememberPagerState(initialPage = state.value.tabIndex ?: defaultTabIndex)
@@ -62,6 +62,7 @@ fun PurchasedScreen(
     // Gọi API theo từng tab
     LaunchedEffect(state.value.tabIndex) {
         when (state.value.tabIndex) {
+            0 -> if(toPayState.value.toPayList == null) purchasedViewModel.getUserPendingPayments()
             1 -> if (confirmState.value.toConfirmList == null) purchasedViewModel.toConfirmAction()
             2 -> if (pickupState.value.toPickupList == null) purchasedViewModel.toPickupAction()
             3 -> if (shippingState.value.shippingList == null) purchasedViewModel.shippingAction()
@@ -106,7 +107,7 @@ fun PurchasedScreen(
                 .padding(innerPadding),
         ) { page ->
             when (page) {
-                0 -> Text("")
+                0 -> PurchasedScreen(navController, purchasedViewModel)
                 1 -> ToConfirmScreen(navController, purchasedViewModel)
                 2 -> ToPickupScreen(navController, purchasedViewModel)
                 3 -> ShippingScreen(

@@ -31,7 +31,7 @@ data class PaymentDto(
     val amount: Long,
     val paymentOrderStatus: PAYMENT_ORDER_STATUS,
     val paymentMethod: PAYMENT_METHOD,
-    val expiryDate: LocalDateTime?=null,
+    val expiryDate: String,
     val user: UserDto,
     val order: OrderDto
 )
