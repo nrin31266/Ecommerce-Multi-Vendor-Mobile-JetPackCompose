@@ -22,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemColors
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -113,7 +114,7 @@ fun BottomBarNav(
                             imageVector = if (selected) item.selectedIcon else item.unselectedIcon,
                             contentDescription = item.title,
                             modifier = Modifier.size(28.dp),
-                            tint = if (selected) MaterialTheme.colorScheme.primary else Color.Black
+//                            tint = if (selected) MaterialTheme.colorScheme.primary else Color.Black
                         )
                     }
                 },
@@ -121,6 +122,7 @@ fun BottomBarNav(
                     Text(text = item.title)
                 },
                 alwaysShowLabel = false,
+
             )
         }
     }

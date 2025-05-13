@@ -9,6 +9,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.usecase.payment.CancelPaymentUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.payment.GetUserOrdersUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.payment.GetUserPendingPaymentsUseCase
+import com.nrin31266.ecommercemultivendor.domain.usecase.payment.RePaymentUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.purchased.UserCancelSellerOrderUseCase
 import com.nrin31266.ecommercemultivendor.domain.usecase.purchased.UserConfirmSellerOrderUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +29,8 @@ class PurchasedViewModel @Inject constructor(
     private val userCancelSellerOrderUseCase: UserCancelSellerOrderUseCase,
     private val userConfirmSellerOrderUseCase: UserConfirmSellerOrderUseCase,
     private val getUserPendingPaymentsUseCase: GetUserPendingPaymentsUseCase,
-    private  val userCancelPaymentUseCase: CancelPaymentUseCase
+    private  val userCancelPaymentUseCase: CancelPaymentUseCase,
+    private val rePaymentUseCase: RePaymentUseCase
 ) : ViewModel() {
     private val _purchasedState = MutableStateFlow(PurchasedState())
     val purchasedState = _purchasedState.asStateFlow()
@@ -51,6 +53,26 @@ class PurchasedViewModel @Inject constructor(
     fun selectTab(tabIndex: Int) {
         _purchasedState.value = _purchasedState.value.copy(tabIndex = tabIndex)
     }
+
+    fun rePayOrder(paymentId: Long){
+        viewModelScope.launch {
+            rePaymentUseCase(paymentId).collect{
+                when(it){
+                    is ResultState.Loading -> {
+
+                    }
+                    is ResultState.Success -> {
+                        _eventFlow.emit(PurchasedEvent.PopToPayment(it.data.payment_link_url!!))
+                    }
+                    is ResultState.Error -> {
+
+                    }
+                }
+            }
+        }
+    }
+
+
 
     fun userCancelPayment(paymentId: Long){
         viewModelScope.launch {
@@ -315,6 +337,7 @@ class PurchasedViewModel @Inject constructor(
 
     sealed class PurchasedEvent {
         data class PopToTab(val tabIndex: Int) : PurchasedEvent()
+        data class PopToPayment(val paymentLink: String) : PurchasedEvent()
     }
 
 
@@ -335,8 +358,7 @@ data class ToConfirmState(
     val isLoading: Boolean = false,
     val errorMessage: String? = null,
     val toConfirmList: List<SellerOrderDto>? = null,
-
-    )
+)
 
 data class ToPickupState(
     val isLoading: Boolean = false,

@@ -253,6 +253,11 @@ class RepoImpl @Inject constructor(private val apiService: ApiService,private va
         emit(makeApiCall { apiService.userCancelPayment(getBearerToken(), paymentId) })
     }.flowOn(Dispatchers.IO)
 
+    override fun rePayOrder(paymentId: Long): Flow<ResultState<PaymentResponse>> = flow {
+        emit(ResultState.Loading)
+        emit(makeApiCall { apiService.rePayOrder(getBearerToken(), paymentId) })
+    }.flowOn(Dispatchers.IO)
+
     private suspend fun getBearerToken(): String {
         val token = authPreferences.jwtFlow.firstOrNull()
             ?: throw IllegalStateException("Unauthorized")

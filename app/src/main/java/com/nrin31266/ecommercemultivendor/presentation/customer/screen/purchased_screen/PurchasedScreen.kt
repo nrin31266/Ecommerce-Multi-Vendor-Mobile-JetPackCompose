@@ -1,5 +1,6 @@
 package com.nrin31266.ecommercemultivendor.presentation.customer.screen.purchased_screen
 
+import android.net.Uri
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -19,6 +20,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.google.accompanist.pager.*
 import com.nrin31266.ecommercemultivendor.presentation.customer.viewmodel.PurchasedViewModel
+import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
 import com.nrin31266.ecommercemultivendor.presentation.utils.CustomTopBar
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -49,6 +51,9 @@ fun PurchasedScreen(
             when (it) {
                 is PurchasedViewModel.PurchasedEvent.PopToTab -> {
                     pagerState.animateScrollToPage(it.tabIndex)
+                }
+                is PurchasedViewModel.PurchasedEvent.PopToPayment -> {
+                    navController.navigate(CustomerRoutes.PaymentWebViewScreen.withLink(Uri.encode(it.paymentLink)))
                 }
             }
         }

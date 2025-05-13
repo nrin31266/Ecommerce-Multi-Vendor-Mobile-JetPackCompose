@@ -93,7 +93,7 @@ fun App() {
 
         if (hasPendingResult) {
             val success = prefs.getBoolean("payment_success", false)
-            prefs.edit().clear().apply() // xoá cờ sau khi xử lý
+            prefs.edit().clear().apply()
 
             navController.navigate(CustomerRoutes.PurchasedScreen.withPath(if (success) 1 else 0))
         }
@@ -333,7 +333,7 @@ fun App() {
                     ) { backStackEntry ->
                         val url = backStackEntry.arguments?.getString("url")
                         if (url != null) {
-                            PaymentScreen(vnpayUrl = url, navController = navController)
+                            PaymentScreen(url, navController = navController)
                         }
                     }
 

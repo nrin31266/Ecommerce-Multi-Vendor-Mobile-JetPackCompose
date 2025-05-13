@@ -1,5 +1,6 @@
 package com.nrin31266.ecommercemultivendor.presentation.components.purchased
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,9 +35,6 @@ fun PendingPaymentItem(
 ) {
 
     CustomCard(
-        elevationDp = 0,
-        shadowDp = 0
-        , shadowColor = Color.White
     ) {
         Column {
             Row (
@@ -47,10 +45,11 @@ fun PendingPaymentItem(
                 CountdownTimer(paymentDto.expiryDate)
             }
             Column (
-                modifier = Modifier.padding(horizontal = 8.dp)
+                modifier = Modifier.padding(horizontal = 8.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ){
                 paymentDto.order.sellerOrders.map {
-                    SellerOrderCardItem(it, purchasedViewModel,navController)
+                    SellerOrderCardItem(it, purchasedViewModel,navController, modifier = Modifier.border(1.dp, Color.LightGray.copy(0.5f)))
                 }
             }
             Divider()
@@ -76,7 +75,9 @@ fun PendingPaymentItem(
                             backgroundColor = colorResource(R.color.error_red),
                             type = ButtonType.OUTLINED
                         )
-                        CustomButton(size = ButtonSize.SMALL, text = "Payment", onClick = {},
+                        CustomButton(size = ButtonSize.SMALL, text = "Payment", onClick = {
+                            purchasedViewModel.rePayOrder(paymentDto.id)
+                        },
                             backgroundColor = MaterialTheme.colorScheme.primary,
                             type = ButtonType.OUTLINED
                         )

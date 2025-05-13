@@ -36,22 +36,16 @@ import retrofit2.http.PUT
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-//fun userSignup(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
-//fun userLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
-//fun sellerLogin(authRequest: AuthRequest): Flow<ResultState<AuthResponse>>
-//fun getUserProfile(jwt: String): Flow<ResultState<UserDto>>
-//fun getSellerProfile(jwt: String): Flow<ResultState<SellerDto>>
+
 interface ApiService {
     @POST("auth/signup")
     suspend fun userSignup(@Body request: AuthRequest): AuthResponse
     @POST("auth/signing")
     suspend fun userLogin(@Body request: AuthRequest): AuthResponse
-//    @POST("sellers/login")
-//    suspend fun sellerLogin(@Body request: AuthRequest): AuthResponse
+
     @GET("users/profile")
     suspend fun getUserProfile(@Header("Authorization") jwt: String): UserDto
-//    @GET("sellers/profile")
-//    suspend fun getSellerProfile(@Header("Authorization") jwt: String): SellerDto
+
     @POST("auth/send-login-signup-otp")
     suspend fun sendEmailOtp(@Body request: AuthRequest): ApiResponseNoData
     @POST("auth/valid-token")
@@ -217,4 +211,10 @@ interface ApiService {
         @Header("Authorization") jwt: String,
         @Path("paymentId") paymentId: Long
     ): PaymentDto
+
+    @POST("api/payment/re-pay/{paymentId}")
+    suspend fun rePayOrder(
+        @Header("Authorization") jwt: String,
+        @Path("paymentId") paymentId: Long
+    ): PaymentResponse
 }

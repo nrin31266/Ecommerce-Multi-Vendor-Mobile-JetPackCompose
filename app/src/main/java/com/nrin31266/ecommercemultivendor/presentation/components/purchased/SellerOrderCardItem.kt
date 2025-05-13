@@ -42,13 +42,14 @@ import com.nrin31266.ecommercemultivendor.presentation.utils.CustomCard
 fun SellerOrderCardItem(
     sellerOrder: SellerOrderDto,
     purchasedViewModel: PurchasedViewModel,
-    navController: NavController?=null
+    navController: NavController?=null,
+    modifier: Modifier = Modifier
 ) {
     var status = sellerOrder.status
     val showMore = rememberSaveable(sellerOrder.id) { mutableStateOf(false) }
 
 
-    CustomCard(modifier = Modifier.fillMaxWidth()) {
+    CustomCard(modifier = modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier
                 .padding(8.dp)

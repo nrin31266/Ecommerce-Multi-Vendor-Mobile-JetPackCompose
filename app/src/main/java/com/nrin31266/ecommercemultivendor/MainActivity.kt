@@ -1,7 +1,9 @@
 package com.nrin31266.ecommercemultivendor
 
+import android.content.ContentValues.TAG
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -43,9 +45,10 @@ class MainActivity : ComponentActivity() {
         val data = intent?.data ?: return
         if (data.scheme == "yourapp" && data.host == "payment-result") {
             val status = data.getQueryParameter("status")
+            Log.d(TAG, status.toString())
             val paymentId = data.getQueryParameter("paymentId")
 
-            val isSuccess = status == "00"
+            val isSuccess = status?.toBoolean() == true
 
             // TODO: bạn có thể lưu kết quả này vào ViewModel, SavedStateHandle hoặc một singleton
             // hoặc broadcast, v.v. để App Composable xử lý sau
