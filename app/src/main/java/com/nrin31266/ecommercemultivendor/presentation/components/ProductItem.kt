@@ -68,7 +68,7 @@ fun ProductItem(
                 contentScale = ContentScale.Fit,
                 modifier = Modifier
                     .height(180.dp)
-                    .fillMaxWidth()
+                    .fillMaxWidth().background(Color.White)
             )
 
             Column(modifier = Modifier.padding(6.dp)) {
@@ -76,12 +76,12 @@ fun ProductItem(
                 Text(
                     text = item.title,
                     style = MaterialTheme.typography.titleSmall,
-                    maxLines = 2,
+                    maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
                 Spacer(modifier = Modifier.height(2.dp))
                 Text(
-                    text = item.seller?.sellerName?:"",
+                    text = item.seller?.businessDetails?.businessName?:"",
                     style = MaterialTheme.typography.bodyMedium,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,

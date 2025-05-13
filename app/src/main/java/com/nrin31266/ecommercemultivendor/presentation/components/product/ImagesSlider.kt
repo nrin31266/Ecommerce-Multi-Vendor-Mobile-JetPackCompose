@@ -56,7 +56,7 @@ fun ImagesSlider(
                 AsyncImage(
                     model = images[page],
                     contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().background(Color.White),
                     contentScale = ContentScale.Fit,
                 )
             }
@@ -108,7 +108,7 @@ fun ImagesSlider(
                         model = imageUrl,
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Fit
                     )
                 }
             }
