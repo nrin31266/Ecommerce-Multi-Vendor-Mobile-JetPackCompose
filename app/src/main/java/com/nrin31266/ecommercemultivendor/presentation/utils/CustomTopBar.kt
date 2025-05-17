@@ -95,6 +95,8 @@ fun CustomTopBar(
                         tint = titleColor
                     )
                 }
+            }else if(extraContent == null && content == null){
+                Box(modifier = Modifier.size(48.dp))
             }
         }
 

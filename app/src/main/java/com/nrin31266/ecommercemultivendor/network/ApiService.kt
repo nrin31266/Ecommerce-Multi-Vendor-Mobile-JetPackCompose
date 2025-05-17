@@ -12,6 +12,7 @@ import com.nrin31266.ecommercemultivendor.domain.dto.OrderItemDto
 import com.nrin31266.ecommercemultivendor.domain.dto.PaymentDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ProductDto
 import com.nrin31266.ecommercemultivendor.domain.dto.ReviewDto
+import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerOrderDto
 import com.nrin31266.ecommercemultivendor.domain.dto.UserDto
 import com.nrin31266.ecommercemultivendor.domain.dto.WishlistItemDto
@@ -217,4 +218,17 @@ interface ApiService {
         @Header("Authorization") jwt: String,
         @Path("paymentId") paymentId: Long
     ): PaymentResponse
+
+    @GET("sellers/{sellerId}")
+    suspend fun getSellerProfile(
+        @Path("sellerId") sellerId: Long
+    ): SellerDto
+
+    @GET("products/shop/{sellerId}")
+    suspend fun getSellerProducts(
+        @Path("sellerId") sellerId: Long
+    ): List<ProductDto>
+
+
+
 }

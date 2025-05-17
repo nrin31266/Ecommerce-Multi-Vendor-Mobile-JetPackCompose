@@ -68,6 +68,16 @@ sealed class CustomerRoutes(val route: String){
             return "payment_webview_screen/$url"
         }
     }
+    data object RatingScreen : CustomerRoutes("rating_screen/{productId}"){
+        fun withPath(productId: Long): String {
+            return "rating_screen/$productId"
+        }
+    }
+    data object ShopScreen : CustomerRoutes("shop_screen/{shopId}"){
+        fun withPath(shopId: Long): String {
+            return "shop_screen/$shopId"
+        }
+    }
 
 
 }

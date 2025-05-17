@@ -167,7 +167,7 @@ fun ProductDetailsScreen(
                         }
                         item {
                             ProductDetailsRating(
-                                viewModel
+                                viewModel,navController
                             )
                         }
                         if(product.seller!=null){
@@ -340,7 +340,8 @@ fun ProductDescription(description: String) {
 
 @Composable
 fun ProductDetailsRating(
-    viewModel: ProductDetailsViewModel
+    viewModel: ProductDetailsViewModel,
+    navController: NavController
 ){
     val ratingState = viewModel.productRatingState.collectAsStateWithLifecycle()
     val state = viewModel.state.collectAsStateWithLifecycle()
@@ -358,8 +359,11 @@ fun ProductDetailsRating(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ){
-                        Text("${product?.avgRating?:0}",
-                            style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            text = String.format("%.1f", product?.avgRating?:0),
+                            style = MaterialTheme.typography.bodySmall
+                        )
+
                         Icon(imageVector = Icons.Default.Star, "",
                             tint = colorResource(R.color.elegant_gold)
                         )
@@ -371,7 +375,10 @@ fun ProductDetailsRating(
                             style = MaterialTheme.typography.bodyMedium)
                     }
                 },
-                actionName = "All"
+                actionName = "All",
+                onActionClick = {
+                    navController.navigate(CustomerRoutes.RatingScreen.withPath(product?.id!!))
+                }
             )
         }
         Divider()

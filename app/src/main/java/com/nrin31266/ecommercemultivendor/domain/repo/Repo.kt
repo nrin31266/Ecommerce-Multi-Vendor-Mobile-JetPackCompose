@@ -76,6 +76,9 @@ interface Repo {
     fun userPendingPayment(): Flow<ResultState<List<PaymentDto>>>
     fun userCancelPayment(paymentId: Long): Flow<ResultState<PaymentDto>>
     fun rePayOrder(paymentId: Long): Flow<ResultState<PaymentResponse>>
+    fun getSellerProfile(sellerId: Long): Flow<ResultState<SellerDto>>
+    fun getSellerProducts(sellerId: Long): Flow<ResultState<List<ProductDto>>>
+
 
 
 

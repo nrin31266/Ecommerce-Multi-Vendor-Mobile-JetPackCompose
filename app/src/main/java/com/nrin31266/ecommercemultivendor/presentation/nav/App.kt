@@ -60,8 +60,10 @@ import com.nrin31266.ecommercemultivendor.presentation.customer.screen.OrdersScr
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.PaymentScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductDetailsScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ProductsScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ReviewScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SearchScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SellerOrderDetailsScreen
+import com.nrin31266.ecommercemultivendor.presentation.customer.screen.ShopScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.SignupScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.WishlistScreen
 import com.nrin31266.ecommercemultivendor.presentation.customer.screen.purchased_screen.PurchasedScreen
@@ -335,6 +337,27 @@ fun App() {
                         if (url != null) {
                             PaymentScreen(url, navController = navController)
                         }
+                    }
+                    composable(
+                        route= CustomerRoutes.RatingScreen.route,
+                        arguments = listOf(
+                            navArgument("productId") { type = NavType.LongType }
+                        )
+                    ){
+                        backStackEntry ->
+                        val productId = backStackEntry.arguments?.getLong("productId") ?: -1
+                        ReviewScreen(navController, productId = productId)
+                    }
+                    composable(
+                        route = CustomerRoutes.ShopScreen.route,
+                        arguments = listOf(
+                            navArgument("shopId") { type = NavType.LongType }
+                        )
+                    ){
+                        backStackEntry ->
+                        val shopId = backStackEntry.arguments?.getLong("shopId") ?: -1
+                        ShopScreen(navController, shopId = shopId)
+
                     }
 
 

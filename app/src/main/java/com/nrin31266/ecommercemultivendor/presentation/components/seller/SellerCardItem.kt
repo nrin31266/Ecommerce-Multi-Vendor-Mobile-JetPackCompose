@@ -30,6 +30,8 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import com.nrin31266.ecommercemultivendor.R
 import com.nrin31266.ecommercemultivendor.domain.dto.SellerDto
+import com.nrin31266.ecommercemultivendor.presentation.nav.CustomerRoutes
+
 @Composable
 fun SellerCardItem(navigation: NavController, seller: SellerDto) {
 
@@ -57,18 +59,20 @@ fun SellerCardItem(navigation: NavController, seller: SellerDto) {
            Column {
                Text(seller.businessDetails?.businessName?:"",
                    fontWeight = FontWeight.Bold, fontSize = 16.sp)
-               Text(seller.pickupAddress?.province?:"Việt Nam", fontSize = 14.sp, color = Color.Gray)
+               Text(seller.businessDetails?.businessAddress?:"Việt Nam", fontSize = 14.sp, color = Color.Gray)
            }
 
        }
         Column {
-            OutlinedButton({},
+            OutlinedButton({
+                navigation.navigate(CustomerRoutes.ShopScreen.withPath(seller.id!!))
+            },
                 shape = RoundedCornerShape(8.dp),
                 border = androidx.compose.foundation.BorderStroke(1.dp, color = MaterialTheme.colorScheme.primary),
                 contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                 modifier = Modifier.defaultMinSize(minWidth = 1.dp, minHeight = 1.dp)
             ) {
-                Text("See All", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
+                Text("See Shop", color = MaterialTheme.colorScheme.primary, fontSize = 14.sp)
             }
         }
     }
